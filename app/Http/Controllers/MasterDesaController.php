@@ -28,6 +28,25 @@ class MasterDesaController extends Controller
         ));
     }
 
+    /**
+     * Get master desa by BPS code.
+     *
+     * @OA\Get(
+     *     path="/api/master-desa/{kodeBps}",
+     *     tags={"Master Data"},
+     *     summary="Get Master Desa by Kode BPS",
+     *     description="Returns a single master desa record by kode_bps",
+     *     @OA\Parameter(name="kodeBps", in="path", required=true, description="Kode BPS", @OA\Schema(type="string")),
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="status", type="string", example="success"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=404, description="Data not found", @OA\JsonContent(
+     *         @OA\Property(property="status", type="string", example="error"),
+     *         @OA\Property(property="message", type="string", example="Data not found")
+     *     ))
+     * )
+     */
     public function getByKodeBps(Request $request, $kodeBps){
         $data = MasterDesa::where('kode_bps', $kodeBps)->first();
         
