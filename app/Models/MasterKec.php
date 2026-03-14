@@ -16,39 +16,6 @@ class MasterKec extends Model
         'kode_bps', 'nama_bps', 'kode_pum', 'nama_pum', 'level', 'parent_code'
     ];
 
-    //set this field for automatic set on list & form input
-    public static $field_info = [     
-        'columns'   => [ //column define field & name of column
-            [
-                'name'          => 'kode_bps', 'label'         => 'Kode BPS',
-                'table_display' => true, 'form_generate' => true, 'form_store' => true,
-            ],
-            [
-                'name'          => 'nama_bps', 'label'         => 'Nama BPS',
-                'table_display' => true, 'form_generate' => true, 'form_store' => true,
-            ],
-            [
-                'name'          => 'kode_pum', 'label'         => 'Kode PUM',
-                'table_display' => true, 'form_generate' => true, 'form_store' => true,
-            ],
-            [
-                'name'          => 'nama_pum', 'label'         => 'Nama PUM',
-                'table_display' => true, 'form_generate' => true, 'form_store' => true,
-            ],
-            [
-                'name'          => 'level', 'label'         => 'Level',
-                'table_display' => true, 'form_generate' => true, 'form_store' => true,
-            ],
-            [
-                'name'          => 'parent_code', 'label'         => 'Parent Code',
-                'table_display' => true, 'form_generate' => true, 'form_store' => true,
-            ],
-            [
-                'name'          => 'kab', 'label'         => 'Kabupaten/Kota',
-                'table_display' => true, 
-            ],
-        ],
-    ];
 
     protected $appends = ['encId', 'kab', 'kode_kec', 'nama_kec', 'kode_kab', 'kode_prov'];
 

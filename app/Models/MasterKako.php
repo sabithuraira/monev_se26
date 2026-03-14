@@ -35,37 +35,7 @@ class MasterKako extends Model
     public function getKodeProvAttribute(){
         return $this->parent_code ?? '';
     }
-
-    //set this field for automatic set on list & form input
-    public static $field_info = [     
-        'columns'   => [ //column define field & name of column
-            [
-                'name'          => 'kode_bps', 'label'         => 'Kode BPS',
-                'table_display' => true, 'form_generate' => true, 'form_store' => true,
-            ],
-            [
-                'name'          => 'nama_bps', 'label'         => 'Nama BPS',
-                'table_display' => true, 'form_generate' => true, 'form_store' => true,
-            ],
-            [
-                'name'          => 'kode_pum', 'label'         => 'Kode PUM',
-                'table_display' => true, 'form_generate' => true, 'form_store' => true,
-            ],
-            [
-                'name'          => 'nama_pum', 'label'         => 'Nama PUM',
-                'table_display' => true, 'form_generate' => true, 'form_store' => true,
-            ],
-            [
-                'name'          => 'level', 'label'         => 'Level',
-                'table_display' => true, 'form_generate' => true, 'form_store' => true,
-            ],
-            [
-                'name'          => 'parent_code', 'label'         => 'Parent Code',
-                'table_display' => true, 'form_generate' => true, 'form_store' => true,
-            ],
-        ],
-    ];
-
+    
     public function getEncIdAttribute(){
         return Crypt::encryptString($this->id);
     }

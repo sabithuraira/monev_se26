@@ -29,6 +29,9 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'kode_kab' => str_pad((string) fake()->numberBetween(1, 17), 2, '0', STR_PAD_LEFT),
+            'kode_kec' => fake()->optional(0.7)->passthrough(str_pad((string) fake()->numberBetween(1, 999), 3, '0', STR_PAD_LEFT)),
+            'kode_desa' => fake()->optional(0.7)->passthrough(str_pad((string) fake()->numberBetween(1, 999), 3, '0', STR_PAD_LEFT)),
         ];
     }
 

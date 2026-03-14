@@ -34,11 +34,20 @@ class SubslsController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        $user = $request->user();
+        $kodeKab = $user?->kode_kab ?? '00';
+
         $perPage = (int) $request->get('per_page', 15);
         $perPage = min(max($perPage, 1), 100);
 
-        $items = Subsls::query()
-            ->when($request->filled('kode_kab'), fn ($q) => $q->where('kode_kab', $request->get('kode_kab')))
+        $query = Subsls::query();
+
+        if ($kodeKab !== '00') {
+            $query->where('kode_kab', $kodeKab);
+        }
+
+        $items = $query
+            ->when($kodeKab === '00' && $request->filled('kode_kab'), fn ($q) => $q->where('kode_kab', $request->get('kode_kab')))
             ->when($request->filled('kode_kec'), fn ($q) => $q->where('kode_kec', $request->get('kode_kec')))
             ->when($request->filled('kode_desa'), fn ($q) => $q->where('kode_desa', $request->get('kode_desa')))
             ->orderBy('id')
@@ -68,12 +77,16 @@ class SubslsController extends Controller
      *     @OA\Response(response=404, description="Not found", @OA\JsonContent(@OA\Property(property="message", type="string", example="Subsls not found.")))
      * )
      */
-    public function show(int $id): JsonResponse
+    public function show(Request $request, int $id): JsonResponse
     {
         $item = Subsls::find($id);
 
         if (! $item) {
             return response()->json(['message' => 'Subsls not found.'], 404);
+        }
+
+        if (! $this->userCanAccessSubsls($request->user(), $item)) {
+            return response()->json(['message' => 'Forbidden. You can only access data for your kabupaten.'], 403);
         }
 
         return response()->json(['data' => new SubslsResource($item)]);
@@ -124,6 +137,10 @@ class SubslsController extends Controller
             return response()->json(['message' => 'Subsls not found.'], 404);
         }
 
+        if (! $this->userCanAccessSubsls($request->user(), $item)) {
+            return response()->json(['message' => 'Forbidden. You can only access data for your kabupaten.'], 403);
+        }
+
         $validated = $request->validate([
             'se26_selesai' => 'sometimes|integer|min:0',
             'se26_diperiksa' => 'sometimes|integer|min:0',
@@ -147,7 +164,7 @@ class SubslsController extends Controller
      *     @OA\Response(response=404, description="Not found", @OA\JsonContent(@OA\Property(property="message", type="string")))
      * )
      */
-    public function destroy(int $id): JsonResponse
+    public function destroy(Request $request, int $id): JsonResponse
     {
         $item = Subsls::find($id);
 
@@ -155,8 +172,26 @@ class SubslsController extends Controller
             return response()->json(['message' => 'Subsls not found.'], 404);
         }
 
+        if (! $this->userCanAccessSubsls($request->user(), $item)) {
+            return response()->json(['message' => 'Forbidden. You can only access data for your kabupaten.'], 403);
+        }
+
         $item->delete();
 
         return response()->json(['message' => 'Deleted.']);
+    }
+
+    /**
+     * Check if the authenticated user can access the given Subsls record based on kode_kab.
+     */
+    private function userCanAccessSubsls($user, Subsls $item): bool
+    {
+        $kodeKab = $user?->kode_kab ?? '00';
+
+        if ($kodeKab === '00') {
+            return true;
+        }
+
+        return $item->kode_kab === $kodeKab;
     }
 }

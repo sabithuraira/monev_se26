@@ -22,6 +22,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'kode_kab',
+        'kode_kec',
+        'kode_desa',
     ];
 
     /**

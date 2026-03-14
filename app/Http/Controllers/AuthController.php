@@ -6,7 +6,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
@@ -37,15 +37,23 @@ class AuthController extends Controller
      */
     public function login(Request $request): JsonResponse
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'email' => 'required|string|email',
             'password' => 'required|string',
         ]);
 
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed.',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
         if (! Auth::guard('web')->attempt($request->only('email', 'password'))) {
-            throw ValidationException::withMessages([
-                'email' => [__('auth.failed')],
-            ]);
+            return response()->json([
+                'message' => __('auth.failed'),
+                'errors' => ['email' => [__('auth.failed')]],
+            ], 401);
         }
 
         /** @var User $user */
@@ -62,6 +70,9 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'kode_kab' => $user->kode_kab,
+                'kode_kec' => $user->kode_kec,
+                'kode_desa' => $user->kode_desa,
             ],
         ]);
     }
