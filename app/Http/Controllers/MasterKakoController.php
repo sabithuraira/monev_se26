@@ -13,7 +13,24 @@ class MasterKakoController extends Controller
 
     /**
      * List records or get single by kode_bps.
-     * GET /api/master-kako?kode_bps=1601 (single) or GET /api/master-kako?per_page=15 (list).
+     *
+     * @OA\Get(
+     *     path="/api/master-kako",
+     *     tags={"Master Kako"},
+     *     summary="List or get Master Kabupaten/Kota",
+     *     description="List paginated records, or get single by kode_bps. Requires Bearer token. Access scoped by user kode_kab.",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="kode_bps", in="query", required=false, description="Get single record by kode_bps (e.g. 1601)", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-100) when listing", @OA\Schema(type="integer", default=15)),
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="status", type="string", example="success"),
+     *         @OA\Property(property="data", description="Single object or array of items"),
+     *         @OA\Property(property="meta", type="object", description="Pagination meta (when list)")
+     *     )),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Data not found"),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function index(Request $request): JsonResponse
     {
@@ -56,6 +73,22 @@ class MasterKakoController extends Controller
 
     /**
      * Get single record by id.
+     *
+     * @OA\Get(
+     *     path="/api/master-kako/{id}",
+     *     tags={"Master Kako"},
+     *     summary="Get Master Kabupaten/Kota by ID",
+     *     description="Returns a single master kabupaten/kota record. Requires Bearer token.",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, description="Record ID", @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="status", type="string", example="success"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Data not found"),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function show(Request $request, int $id): JsonResponse
     {
@@ -74,6 +107,29 @@ class MasterKakoController extends Controller
 
     /**
      * Create a new record.
+     *
+     * @OA\Post(
+     *     path="/api/master-kako",
+     *     tags={"Master Kako"},
+     *     summary="Create Master Kabupaten/Kota",
+     *     description="Create a new master kabupaten/kota record. Requires Bearer token.",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(required=true, @OA\JsonContent(
+     *         required={"kode_bps","nama_bps","kode_pum","nama_pum","level","parent_code"},
+     *         @OA\Property(property="kode_bps", type="string", maxLength=10),
+     *         @OA\Property(property="nama_bps", type="string", maxLength=255),
+     *         @OA\Property(property="kode_pum", type="string", maxLength=10),
+     *         @OA\Property(property="nama_pum", type="string", maxLength=255),
+     *         @OA\Property(property="level", type="string", maxLength=4),
+     *         @OA\Property(property="parent_code", type="string", maxLength=7)
+     *     )),
+     *     @OA\Response(response=201, description="Created", @OA\JsonContent(
+     *         @OA\Property(property="status", type="string", example="success"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function store(Request $request): JsonResponse
     {
@@ -91,6 +147,47 @@ class MasterKakoController extends Controller
 
     /**
      * Update a record by id.
+     *
+     * @OA\Put(
+     *     path="/api/master-kako/{id}",
+     *     tags={"Master Kako"},
+     *     summary="Update Master Kabupaten/Kota",
+     *     description="Update a master kabupaten/kota record by ID. Requires Bearer token.",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, description="Record ID", @OA\Schema(type="integer")),
+     *     @OA\RequestBody(required=false, @OA\JsonContent(
+     *         @OA\Property(property="kode_bps", type="string", maxLength=10),
+     *         @OA\Property(property="nama_bps", type="string", maxLength=255),
+     *         @OA\Property(property="kode_pum", type="string", maxLength=10),
+     *         @OA\Property(property="nama_pum", type="string", maxLength=255),
+     *         @OA\Property(property="level", type="string", maxLength=4),
+     *         @OA\Property(property="parent_code", type="string", maxLength=7)
+     *     )),
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="status", type="string", example="success"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Data not found"),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
+     * @OA\Patch(
+     *     path="/api/master-kako/{id}",
+     *     tags={"Master Kako"},
+     *     summary="Update Master Kabupaten/Kota (PATCH)",
+     *     description="Same as PUT. Requires Bearer token.",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(required=false, @OA\JsonContent(
+     *         @OA\Property(property="kode_bps", type="string"), @OA\Property(property="nama_bps", type="string"),
+     *         @OA\Property(property="kode_pum", type="string"), @OA\Property(property="nama_pum", type="string"),
+     *         @OA\Property(property="level", type="string"), @OA\Property(property="parent_code", type="string")
+     *     )),
+     *     @OA\Response(response=200, description="Success"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Not found")
+     * )
      */
     public function update(Request $request, int $id): JsonResponse
     {
@@ -118,6 +215,22 @@ class MasterKakoController extends Controller
 
     /**
      * Delete a record by id.
+     *
+     * @OA\Delete(
+     *     path="/api/master-kako/{id}",
+     *     tags={"Master Kako"},
+     *     summary="Delete Master Kabupaten/Kota",
+     *     description="Delete a master kabupaten/kota record by ID. Requires Bearer token.",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, description="Record ID", @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Deleted", @OA\JsonContent(
+     *         @OA\Property(property="status", type="string", example="success"),
+     *         @OA\Property(property="message", type="string", example="Deleted.")
+     *     )),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Data not found"),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function destroy(Request $request, int $id): JsonResponse
     {

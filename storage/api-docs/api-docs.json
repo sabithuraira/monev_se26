@@ -161,6 +161,1165 @@
                 ]
             }
         },
+        "/api/master-desa": {
+            "get": {
+                "tags": [
+                    "Master Desa"
+                ],
+                "summary": "List or get Master Desa",
+                "description": "List paginated records (optional filters: kode_kab = kode_bps chars 3-4, kode_kec = chars 5-7), or get single by kode_bps. Requires Bearer token.",
+                "operationId": "7f0eeef8b3a2fe891a322fffd97ec54c",
+                "parameters": [
+                    {
+                        "name": "kode_bps",
+                        "in": "query",
+                        "description": "Get single record by kode_bps (e.g. 1601052001)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "kode_kab",
+                        "in": "query",
+                        "description": "Filter list by kab (kode_bps positions 3-4)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "kode_kec",
+                        "in": "query",
+                        "description": "Filter list by kec (kode_bps positions 5-7)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page (1-100)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "description": "Single object or array"
+                                        },
+                                        "meta": {
+                                            "description": "Pagination meta (when list)",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Data not found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Master Desa"
+                ],
+                "summary": "Create Master Desa",
+                "description": "Create a new master desa record. Requires Bearer token.",
+                "operationId": "4b4080860ec07fb3eb37ce91ee056d0d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "kode_bps",
+                                    "nama_bps",
+                                    "kode_pum",
+                                    "nama_pum",
+                                    "level",
+                                    "parent_code"
+                                ],
+                                "properties": {
+                                    "kode_bps": {
+                                        "type": "string",
+                                        "maxLength": 10
+                                    },
+                                    "nama_bps": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "kode_pum": {
+                                        "type": "string",
+                                        "maxLength": 10
+                                    },
+                                    "nama_pum": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "level": {
+                                        "type": "string",
+                                        "maxLength": 4
+                                    },
+                                    "parent_code": {
+                                        "type": "string",
+                                        "maxLength": 7
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/master-desa/{id}": {
+            "get": {
+                "tags": [
+                    "Master Desa"
+                ],
+                "summary": "Get Master Desa by ID",
+                "description": "Returns a single master desa record. Requires Bearer token.",
+                "operationId": "a58c6a2104fe9fe89e7469387e22b3bf",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Record ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Data not found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Master Desa"
+                ],
+                "summary": "Update Master Desa",
+                "description": "Update a master desa record by ID. Requires Bearer token.",
+                "operationId": "c4eb5acef137368e942b7fa1dc5716e7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "kode_bps": {
+                                        "type": "string"
+                                    },
+                                    "nama_bps": {
+                                        "type": "string"
+                                    },
+                                    "kode_pum": {
+                                        "type": "string"
+                                    },
+                                    "nama_pum": {
+                                        "type": "string"
+                                    },
+                                    "level": {
+                                        "type": "string"
+                                    },
+                                    "parent_code": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Master Desa"
+                ],
+                "summary": "Delete Master Desa",
+                "description": "Delete a master desa record by ID. Requires Bearer token.",
+                "operationId": "f061a27815de7a309c2702518a17f254",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Deleted",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Deleted."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Data not found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Master Desa"
+                ],
+                "summary": "Update Master Desa (PATCH)",
+                "operationId": "63c890cc82782441667baf2a3a419bc5",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/master-kako": {
+            "get": {
+                "tags": [
+                    "Master Kako"
+                ],
+                "summary": "List or get Master Kabupaten/Kota",
+                "description": "List paginated records, or get single by kode_bps. Requires Bearer token. Access scoped by user kode_kab.",
+                "operationId": "555b35d8d9134f36ada3d57a2c84870d",
+                "parameters": [
+                    {
+                        "name": "kode_bps",
+                        "in": "query",
+                        "description": "Get single record by kode_bps (e.g. 1601)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page (1-100) when listing",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "description": "Single object or array of items"
+                                        },
+                                        "meta": {
+                                            "description": "Pagination meta (when list)",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Data not found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Master Kako"
+                ],
+                "summary": "Create Master Kabupaten/Kota",
+                "description": "Create a new master kabupaten/kota record. Requires Bearer token.",
+                "operationId": "eba8d8bebaf953e9f8679010ecad97bb",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "kode_bps",
+                                    "nama_bps",
+                                    "kode_pum",
+                                    "nama_pum",
+                                    "level",
+                                    "parent_code"
+                                ],
+                                "properties": {
+                                    "kode_bps": {
+                                        "type": "string",
+                                        "maxLength": 10
+                                    },
+                                    "nama_bps": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "kode_pum": {
+                                        "type": "string",
+                                        "maxLength": 10
+                                    },
+                                    "nama_pum": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "level": {
+                                        "type": "string",
+                                        "maxLength": 4
+                                    },
+                                    "parent_code": {
+                                        "type": "string",
+                                        "maxLength": 7
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/master-kako/{id}": {
+            "get": {
+                "tags": [
+                    "Master Kako"
+                ],
+                "summary": "Get Master Kabupaten/Kota by ID",
+                "description": "Returns a single master kabupaten/kota record. Requires Bearer token.",
+                "operationId": "959cc39c17abcfae3c04eb0173c2c3d0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Record ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Data not found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Master Kako"
+                ],
+                "summary": "Update Master Kabupaten/Kota",
+                "description": "Update a master kabupaten/kota record by ID. Requires Bearer token.",
+                "operationId": "86f53f33ce2a1cd86bbd7886420c6e40",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Record ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "kode_bps": {
+                                        "type": "string",
+                                        "maxLength": 10
+                                    },
+                                    "nama_bps": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "kode_pum": {
+                                        "type": "string",
+                                        "maxLength": 10
+                                    },
+                                    "nama_pum": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "level": {
+                                        "type": "string",
+                                        "maxLength": 4
+                                    },
+                                    "parent_code": {
+                                        "type": "string",
+                                        "maxLength": 7
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Data not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Master Kako"
+                ],
+                "summary": "Delete Master Kabupaten/Kota",
+                "description": "Delete a master kabupaten/kota record by ID. Requires Bearer token.",
+                "operationId": "59ad2b3aacd4aa2cc7b9c4fa27bc7701",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Record ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Deleted",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Deleted."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Data not found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Master Kako"
+                ],
+                "summary": "Update Master Kabupaten/Kota (PATCH)",
+                "description": "Same as PUT. Requires Bearer token.",
+                "operationId": "568e8cece8e63db12897ecb9234434ce",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "kode_bps": {
+                                        "type": "string"
+                                    },
+                                    "nama_bps": {
+                                        "type": "string"
+                                    },
+                                    "kode_pum": {
+                                        "type": "string"
+                                    },
+                                    "nama_pum": {
+                                        "type": "string"
+                                    },
+                                    "level": {
+                                        "type": "string"
+                                    },
+                                    "parent_code": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/master-kec": {
+            "get": {
+                "tags": [
+                    "Master Kec"
+                ],
+                "summary": "List or get Master Kecamatan",
+                "description": "List paginated records (optional filter by kode_kab = chars 3-4 of kode_bps), or get single by kode_bps. Requires Bearer token.",
+                "operationId": "9c8c4c35f5446d5df5e92938e93cc7b7",
+                "parameters": [
+                    {
+                        "name": "kode_bps",
+                        "in": "query",
+                        "description": "Get single record by kode_bps (e.g. 1601052)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "kode_kab",
+                        "in": "query",
+                        "description": "Filter list by kab (kode_bps positions 3-4)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page (1-100)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "description": "Single object or array"
+                                        },
+                                        "meta": {
+                                            "description": "Pagination meta (when list)",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Data not found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Master Kec"
+                ],
+                "summary": "Create Master Kecamatan",
+                "description": "Create a new master kecamatan record. Requires Bearer token.",
+                "operationId": "46ecaca89f57efb354bba2a6acab992c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "kode_bps",
+                                    "nama_bps",
+                                    "kode_pum",
+                                    "nama_pum",
+                                    "level",
+                                    "parent_code"
+                                ],
+                                "properties": {
+                                    "kode_bps": {
+                                        "type": "string",
+                                        "maxLength": 10
+                                    },
+                                    "nama_bps": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "kode_pum": {
+                                        "type": "string",
+                                        "maxLength": 10
+                                    },
+                                    "nama_pum": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "level": {
+                                        "type": "string",
+                                        "maxLength": 4
+                                    },
+                                    "parent_code": {
+                                        "type": "string",
+                                        "maxLength": 7
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/master-kec/{id}": {
+            "get": {
+                "tags": [
+                    "Master Kec"
+                ],
+                "summary": "Get Master Kecamatan by ID",
+                "description": "Returns a single master kecamatan record. Requires Bearer token.",
+                "operationId": "42f2c98fe4dfef0cc3191c82d3fbc31e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Record ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Data not found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Master Kec"
+                ],
+                "summary": "Update Master Kecamatan",
+                "description": "Update a master kecamatan record by ID. Requires Bearer token.",
+                "operationId": "5fb52f0bd638aa061dddcd568f964724",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "kode_bps": {
+                                        "type": "string"
+                                    },
+                                    "nama_bps": {
+                                        "type": "string"
+                                    },
+                                    "kode_pum": {
+                                        "type": "string"
+                                    },
+                                    "nama_pum": {
+                                        "type": "string"
+                                    },
+                                    "level": {
+                                        "type": "string"
+                                    },
+                                    "parent_code": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Master Kec"
+                ],
+                "summary": "Delete Master Kecamatan",
+                "description": "Delete a master kecamatan record by ID. Requires Bearer token.",
+                "operationId": "b7b94d22e3ba37d111b572b29755700b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Deleted",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Deleted."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Data not found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Master Kec"
+                ],
+                "summary": "Update Master Kecamatan (PATCH)",
+                "operationId": "4bec8eeb3654877b6bd99fba9ce97153",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/subsls": {
             "get": {
                 "tags": [
@@ -498,6 +1657,18 @@
         {
             "name": "Auth",
             "description": "Auth"
+        },
+        {
+            "name": "Master Desa",
+            "description": "Master Desa"
+        },
+        {
+            "name": "Master Kako",
+            "description": "Master Kako"
+        },
+        {
+            "name": "Master Kec",
+            "description": "Master Kec"
         },
         {
             "name": "Subsls",

@@ -13,7 +13,26 @@ class MasterDesaController extends Controller
 
     /**
      * List records or get single by kode_bps.
-     * GET /api/master-desa?kode_bps=1601052001 (single) or GET /api/master-desa?per_page=15 (list).
+     *
+     * @OA\Get(
+     *     path="/api/master-desa",
+     *     tags={"Master Desa"},
+     *     summary="List or get Master Desa",
+     *     description="List paginated records (optional filters: kode_kab = kode_bps chars 3-4, kode_kec = chars 5-7), or get single by kode_bps. Requires Bearer token.",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="kode_bps", in="query", required=false, description="Get single record by kode_bps (e.g. 1601052001)", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="kode_kab", in="query", required=false, description="Filter list by kab (kode_bps positions 3-4)", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="kode_kec", in="query", required=false, description="Filter list by kec (kode_bps positions 5-7)", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-100)", @OA\Schema(type="integer", default=15)),
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="status", type="string", example="success"),
+     *         @OA\Property(property="data", description="Single object or array"),
+     *         @OA\Property(property="meta", type="object", description="Pagination meta (when list)")
+     *     )),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Data not found"),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function index(Request $request): JsonResponse
     {
@@ -62,6 +81,22 @@ class MasterDesaController extends Controller
 
     /**
      * Get single record by id.
+     *
+     * @OA\Get(
+     *     path="/api/master-desa/{id}",
+     *     tags={"Master Desa"},
+     *     summary="Get Master Desa by ID",
+     *     description="Returns a single master desa record. Requires Bearer token.",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, description="Record ID", @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="status", type="string", example="success"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Data not found"),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function show(Request $request, int $id): JsonResponse
     {
@@ -80,6 +115,29 @@ class MasterDesaController extends Controller
 
     /**
      * Create a new record.
+     *
+     * @OA\Post(
+     *     path="/api/master-desa",
+     *     tags={"Master Desa"},
+     *     summary="Create Master Desa",
+     *     description="Create a new master desa record. Requires Bearer token.",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(required=true, @OA\JsonContent(
+     *         required={"kode_bps","nama_bps","kode_pum","nama_pum","level","parent_code"},
+     *         @OA\Property(property="kode_bps", type="string", maxLength=10),
+     *         @OA\Property(property="nama_bps", type="string", maxLength=255),
+     *         @OA\Property(property="kode_pum", type="string", maxLength=10),
+     *         @OA\Property(property="nama_pum", type="string", maxLength=255),
+     *         @OA\Property(property="level", type="string", maxLength=4),
+     *         @OA\Property(property="parent_code", type="string", maxLength=7)
+     *     )),
+     *     @OA\Response(response=201, description="Created", @OA\JsonContent(
+     *         @OA\Property(property="status", type="string", example="success"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function store(Request $request): JsonResponse
     {
@@ -97,6 +155,31 @@ class MasterDesaController extends Controller
 
     /**
      * Update a record by id.
+     *
+     * @OA\Put(
+     *     path="/api/master-desa/{id}",
+     *     tags={"Master Desa"},
+     *     summary="Update Master Desa",
+     *     description="Update a master desa record by ID. Requires Bearer token.",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(required=false, @OA\JsonContent(
+     *         @OA\Property(property="kode_bps", type="string"), @OA\Property(property="nama_bps", type="string"),
+     *         @OA\Property(property="kode_pum", type="string"), @OA\Property(property="nama_pum", type="string"),
+     *         @OA\Property(property="level", type="string"), @OA\Property(property="parent_code", type="string")
+     *     )),
+     *     @OA\Response(response=200, description="Success"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Not found")
+     * )
+     * @OA\Patch(
+     *     path="/api/master-desa/{id}",
+     *     tags={"Master Desa"},
+     *     summary="Update Master Desa (PATCH)",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Success")
+     * )
      */
     public function update(Request $request, int $id): JsonResponse
     {
@@ -124,6 +207,22 @@ class MasterDesaController extends Controller
 
     /**
      * Delete a record by id.
+     *
+     * @OA\Delete(
+     *     path="/api/master-desa/{id}",
+     *     tags={"Master Desa"},
+     *     summary="Delete Master Desa",
+     *     description="Delete a master desa record by ID. Requires Bearer token.",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Deleted", @OA\JsonContent(
+     *         @OA\Property(property="status", type="string", example="success"),
+     *         @OA\Property(property="message", type="string", example="Deleted.")
+     *     )),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Data not found"),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function destroy(Request $request, int $id): JsonResponse
     {
