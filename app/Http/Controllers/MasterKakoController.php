@@ -21,7 +21,7 @@ class MasterKakoController extends Controller
      *     description="List paginated records, or get single by kode_bps. Requires Bearer token. Access scoped by user kode_kab.",
      *     security={{"sanctum":{}}},
      *     @OA\Parameter(name="kode_bps", in="query", required=false, description="Get single record by kode_bps (e.g. 1601)", @OA\Schema(type="string")),
-     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-100) when listing", @OA\Schema(type="integer", default=15)),
+     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-1000) when listing", @OA\Schema(type="integer", default=15)),
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
      *         @OA\Property(property="status", type="string", example="success"),
      *         @OA\Property(property="data", description="Single object or array of items"),
@@ -56,7 +56,7 @@ class MasterKakoController extends Controller
         }
 
         $query = $this->scopeByUser($request->user(), MasterKako::query());
-        $perPage = min(max((int) $request->get('per_page', 15), 1), 100);
+        $perPage = min(max((int) $request->get('per_page', 15), 1), 1000);
         $items = $query->orderBy('kode_bps')->paginate($perPage);
 
         return response()->json([

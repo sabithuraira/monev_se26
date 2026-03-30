@@ -17,7 +17,7 @@ class SubslsController extends Controller
      *     tags={"Subsls"},
      *     summary="List Subsls",
      *     description="Paginated list of subsls. Filter by kode_kab, kode_kec, kode_desa.",
-     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-100)", @OA\Schema(type="integer", default=15)),
+     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-1000)", @OA\Schema(type="integer", default=15)),
      *     @OA\Parameter(name="kode_kab", in="query", required=false, description="Filter by kode kabupaten", @OA\Schema(type="string")),
      *     @OA\Parameter(name="kode_kec", in="query", required=false, description="Filter by kode kecamatan", @OA\Schema(type="string")),
      *     @OA\Parameter(name="kode_desa", in="query", required=false, description="Filter by kode desa", @OA\Schema(type="string")),
@@ -38,7 +38,7 @@ class SubslsController extends Controller
         $kodeKab = $user?->kode_kab ?? '00';
 
         $perPage = (int) $request->get('per_page', 15);
-        $perPage = min(max($perPage, 1), 100);
+        $perPage = min(max($perPage, 1), 1000);
 
         $query = Subsls::query();
 
