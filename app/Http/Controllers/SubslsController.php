@@ -93,19 +93,20 @@ class SubslsController extends Controller
     }
 
     /**
-     * Update only se26_selesai and se26_diperiksa.
+     * Update se26_selesai, se26_diperiksa, and se2026_is_finish.
      *
      * @OA\Patch(
      *     path="/api/subsls/{id}",
      *     tags={"Subsls"},
-     *     summary="Update Subsls (se26 fields only)",
-     *     description="Update only se26_selesai and se26_diperiksa. Other fields are ignored.",
+     *     summary="Update Subsls (allowed fields only)",
+     *     description="Update only se26_selesai, se26_diperiksa, and se2026_is_finish (0/1). Other fields are ignored.",
      *     @OA\Parameter(name="id", in="path", required=true, description="Subsls ID", @OA\Schema(type="integer")),
      *     @OA\RequestBody(
      *         required=false,
      *         @OA\JsonContent(
      *             @OA\Property(property="se26_selesai", type="integer", minimum=0),
-     *             @OA\Property(property="se26_diperiksa", type="integer", minimum=0)
+     *             @OA\Property(property="se26_diperiksa", type="integer", minimum=0),
+     *             @OA\Property(property="se2026_is_finish", type="integer", description="0 or 1", enum={0,1})
      *         )
      *     ),
      *     @OA\Response(response=200, description="Updated", @OA\JsonContent(@OA\Property(property="data", type="object"))),
@@ -115,14 +116,15 @@ class SubslsController extends Controller
      * @OA\Put(
      *     path="/api/subsls/{id}",
      *     tags={"Subsls"},
-     *     summary="Update Subsls (se26 fields only)",
-     *     description="Same as PATCH - update only se26_selesai and se26_diperiksa.",
+     *     summary="Update Subsls (allowed fields only)",
+     *     description="Same as PATCH.",
      *     @OA\Parameter(name="id", in="path", required=true, description="Subsls ID", @OA\Schema(type="integer")),
      *     @OA\RequestBody(
      *         required=false,
      *         @OA\JsonContent(
      *             @OA\Property(property="se26_selesai", type="integer", minimum=0),
-     *             @OA\Property(property="se26_diperiksa", type="integer", minimum=0)
+     *             @OA\Property(property="se26_diperiksa", type="integer", minimum=0),
+     *             @OA\Property(property="se2026_is_finish", type="integer", enum={0,1})
      *         )
      *     ),
      *     @OA\Response(response=200, description="Updated", @OA\JsonContent(@OA\Property(property="data", type="object"))),
@@ -144,6 +146,7 @@ class SubslsController extends Controller
         $validated = $request->validate([
             'se26_selesai' => 'sometimes|integer|min:0',
             'se26_diperiksa' => 'sometimes|integer|min:0',
+            'se2026_is_finish' => 'sometimes|integer|in:0,1',
         ]);
 
         $item->update($validated);

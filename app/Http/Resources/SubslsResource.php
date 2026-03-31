@@ -35,6 +35,7 @@ class SubslsResource extends JsonResource
             'jumlah_muatan' => $this->jumlah_muatan,
             'se26_selesai' => $this->se26_selesai,
             'se26_diperiksa' => $this->se26_diperiksa,
+            'se2026_is_finish' => $this->se2026_is_finish,
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
         ];

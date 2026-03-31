@@ -200,7 +200,7 @@
                     {
                         "name": "per_page",
                         "in": "query",
-                        "description": "Items per page (1-100)",
+                        "description": "Items per page (1-1000)",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -555,7 +555,7 @@
                     {
                         "name": "per_page",
                         "in": "query",
-                        "description": "Items per page (1-100) when listing",
+                        "description": "Items per page (1-1000) when listing",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -986,7 +986,7 @@
                     {
                         "name": "per_page",
                         "in": "query",
-                        "description": "Items per page (1-100)",
+                        "description": "Items per page (1-1000)",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -1332,7 +1332,7 @@
                     {
                         "name": "per_page",
                         "in": "query",
-                        "description": "Items per page (1-100)",
+                        "description": "Items per page (1-1000)",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -1463,8 +1463,8 @@
                 "tags": [
                     "Subsls"
                 ],
-                "summary": "Update Subsls (se26 fields only)",
-                "description": "Same as PATCH - update only se26_selesai and se26_diperiksa.",
+                "summary": "Update Subsls (allowed fields only)",
+                "description": "Same as PATCH.",
                 "operationId": "b638c2a7600b0a21a16b552c94060432",
                 "parameters": [
                     {
@@ -1490,6 +1490,13 @@
                                     "se26_diperiksa": {
                                         "type": "integer",
                                         "minimum": 0
+                                    },
+                                    "se2026_is_finish": {
+                                        "type": "integer",
+                                        "enum": [
+                                            0,
+                                            1
+                                        ]
                                     }
                                 },
                                 "type": "object"
@@ -1574,8 +1581,8 @@
                 "tags": [
                     "Subsls"
                 ],
-                "summary": "Update Subsls (se26 fields only)",
-                "description": "Update only se26_selesai and se26_diperiksa. Other fields are ignored.",
+                "summary": "Update Subsls (allowed fields only)",
+                "description": "Update only se26_selesai, se26_diperiksa, and se2026_is_finish (0/1). Other fields are ignored.",
                 "operationId": "d125f554707cc96890691b7ff2b07448",
                 "parameters": [
                     {
@@ -1601,6 +1608,14 @@
                                     "se26_diperiksa": {
                                         "type": "integer",
                                         "minimum": 0
+                                    },
+                                    "se2026_is_finish": {
+                                        "description": "0 or 1",
+                                        "type": "integer",
+                                        "enum": [
+                                            0,
+                                            1
+                                        ]
                                     }
                                 },
                                 "type": "object"

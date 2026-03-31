@@ -31,6 +31,7 @@ class Subsls extends Model
         'jumlah_muatan',
         'se26_selesai',
         'se26_diperiksa',
+        'se2026_is_finish',
     ];
 
     protected $casts = [
@@ -43,5 +44,6 @@ class Subsls extends Model
         'jumlah_muatan' => 'integer',
         'se26_selesai' => 'integer',
         'se26_diperiksa' => 'integer',
+        'se2026_is_finish' => 'integer',
     ];
 }
