@@ -3,12 +3,94 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\SubslsResource;
+use App\Models\MasterDesa;
+use App\Models\MasterKako;
+use App\Models\MasterKec;
 use App\Models\Subsls;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class SubslsController extends Controller
 {
+    /**
+     * Web: Blade table of subsls with kab/kec/desa names from master tables.
+     */
+    public function indexPage(Request $request): View
+    {
+        $items = $this->buildSubslsPageQuery($request)
+            ->paginate(20);
+
+        return view('subsls.index', ['items' => $items]);
+    }
+
+    public function listData(Request $request): JsonResponse
+    {
+        $items = $this->buildSubslsPageQuery($request)
+            ->paginate(20, ['*'], 'page', (int) $request->get('page', 1));
+
+        return response()->json([
+            'data' => $items->items(),
+            'meta' => [
+                'current_page' => $items->currentPage(),
+                'last_page' => $items->lastPage(),
+                'per_page' => $items->perPage(),
+                'total' => $items->total(),
+                'from' => $items->firstItem(),
+                'to' => $items->lastItem(),
+            ],
+        ]);
+    }
+
+    public function kabupatenOptions(Request $request): JsonResponse
+    {
+        $kodeKab = $request->user()?->kode_kab ?? '00';
+
+        $options = MasterKako::query()
+            ->selectRaw('RIGHT(kode_bps, 2) as value, kode_bps, nama_bps as label')
+            ->where('kode_bps', 'like', '16__')
+            ->when($kodeKab !== '00', fn ($q) => $q->whereRaw('RIGHT(kode_bps, 2) = ?', [$kodeKab]))
+            ->orderBy('kode_bps')
+            ->get();
+
+        return response()->json(['data' => $options]);
+    }
+
+    public function kecamatanOptions(Request $request): JsonResponse
+    {
+        $kodeKab = (string) $request->get('kode_kab', '');
+        if ($kodeKab === '') {
+            return response()->json(['data' => []]);
+        }
+
+        $options = MasterKec::query()
+            ->selectRaw('RIGHT(kode_bps, 3) as value, kode_bps, nama_bps as label')
+            ->whereRaw('CHAR_LENGTH(kode_bps) = 7')
+            ->whereRaw("kode_bps LIKE CONCAT('16', ?, '%')", [$kodeKab])
+            ->orderBy('kode_bps')
+            ->get();
+
+        return response()->json(['data' => $options]);
+    }
+
+    public function desaOptions(Request $request): JsonResponse
+    {
+        $kodeKab = (string) $request->get('kode_kab', '');
+        $kodeKec = (string) $request->get('kode_kec', '');
+        if ($kodeKab === '' || $kodeKec === '') {
+            return response()->json(['data' => []]);
+        }
+
+        $options = MasterDesa::query()
+            ->selectRaw('RIGHT(kode_bps, 3) as value, kode_bps, nama_bps as label')
+            ->whereRaw('CHAR_LENGTH(kode_bps) = 10')
+            ->whereRaw("kode_bps LIKE CONCAT('16', ?, ?, '%')", [$kodeKab, $kodeKec])
+            ->orderBy('kode_bps')
+            ->get();
+
+        return response()->json(['data' => $options]);
+    }
+
     /**
      * Display a listing of subsls with optional filters.
      *
@@ -17,11 +99,14 @@ class SubslsController extends Controller
      *     tags={"Subsls"},
      *     summary="List Subsls",
      *     description="Paginated list of subsls. Filter by kode_kab, kode_kec, kode_desa.",
+     *
      *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-1000)", @OA\Schema(type="integer", default=15)),
      *     @OA\Parameter(name="kode_kab", in="query", required=false, description="Filter by kode kabupaten", @OA\Schema(type="string")),
      *     @OA\Parameter(name="kode_kec", in="query", required=false, description="Filter by kode kecamatan", @OA\Schema(type="string")),
      *     @OA\Parameter(name="kode_desa", in="query", required=false, description="Filter by kode desa", @OA\Schema(type="string")),
+     *
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *
      *         @OA\Property(property="data", type="array", @OA\Items(type="object")),
      *         @OA\Property(property="meta", type="object",
      *             @OA\Property(property="current_page", type="integer"),
@@ -72,7 +157,9 @@ class SubslsController extends Controller
      *     tags={"Subsls"},
      *     summary="Get Subsls by ID",
      *     description="Returns a single subsls record",
+     *
      *     @OA\Parameter(name="id", in="path", required=true, description="Subsls ID", @OA\Schema(type="integer")),
+     *
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(@OA\Property(property="data", type="object"))),
      *     @OA\Response(response=404, description="Not found", @OA\JsonContent(@OA\Property(property="message", type="string", example="Subsls not found.")))
      * )
@@ -100,15 +187,20 @@ class SubslsController extends Controller
      *     tags={"Subsls"},
      *     summary="Update Subsls (allowed fields only)",
      *     description="Update only se26_selesai, se26_diperiksa, and se2026_is_finish (0/1). Other fields are ignored.",
+     *
      *     @OA\Parameter(name="id", in="path", required=true, description="Subsls ID", @OA\Schema(type="integer")),
+     *
      *     @OA\RequestBody(
      *         required=false,
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="se26_selesai", type="integer", minimum=0),
      *             @OA\Property(property="se26_diperiksa", type="integer", minimum=0),
      *             @OA\Property(property="se2026_is_finish", type="integer", description="0 or 1", enum={0,1})
      *         )
      *     ),
+     *
      *     @OA\Response(response=200, description="Updated", @OA\JsonContent(@OA\Property(property="data", type="object"))),
      *     @OA\Response(response=404, description="Not found", @OA\JsonContent(@OA\Property(property="message", type="string")))
      * )
@@ -118,15 +210,20 @@ class SubslsController extends Controller
      *     tags={"Subsls"},
      *     summary="Update Subsls (allowed fields only)",
      *     description="Same as PATCH.",
+     *
      *     @OA\Parameter(name="id", in="path", required=true, description="Subsls ID", @OA\Schema(type="integer")),
+     *
      *     @OA\RequestBody(
      *         required=false,
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="se26_selesai", type="integer", minimum=0),
      *             @OA\Property(property="se26_diperiksa", type="integer", minimum=0),
      *             @OA\Property(property="se2026_is_finish", type="integer", enum={0,1})
      *         )
      *     ),
+     *
      *     @OA\Response(response=200, description="Updated", @OA\JsonContent(@OA\Property(property="data", type="object"))),
      *     @OA\Response(response=404, description="Not found")
      * )
@@ -162,7 +259,9 @@ class SubslsController extends Controller
      *     tags={"Subsls"},
      *     summary="Delete Subsls",
      *     description="Delete a subsls record by ID",
+     *
      *     @OA\Parameter(name="id", in="path", required=true, description="Subsls ID", @OA\Schema(type="integer")),
+     *
      *     @OA\Response(response=200, description="Deleted", @OA\JsonContent(@OA\Property(property="message", type="string", example="Deleted."))),
      *     @OA\Response(response=404, description="Not found", @OA\JsonContent(@OA\Property(property="message", type="string")))
      * )
@@ -196,5 +295,47 @@ class SubslsController extends Controller
         }
 
         return $item->kode_kab === $kodeKab;
+    }
+
+    private function buildSubslsPageQuery(Request $request)
+    {
+        $kodeKabUser = $request->user()?->kode_kab ?? '00';
+        $selectedKab = (string) $request->get('kode_kab', '');
+        $selectedKec = (string) $request->get('kode_kec', '');
+        $selectedDesa = (string) $request->get('kode_desa', '');
+
+        $query = Subsls::query()
+            ->select([
+                'subsls.id',
+                'subsls.nama_sls',
+                'subsls.se26_selesai',
+                'subsls.se26_diperiksa',
+                'subsls.se2026_is_finish',
+                'subsls.kode_kab',
+                'subsls.kode_kec',
+                'subsls.kode_desa',
+                'mk.nama_bps as nama_kabupaten_kota',
+                'mkec.nama_bps as nama_kecamatan',
+                'mdes.nama_bps as nama_desa_kelurahan',
+            ])
+            ->leftJoin('master_kako as mk', function ($join) {
+                $join->whereRaw("mk.kode_bps = CONCAT('16', subsls.kode_kab)");
+            })
+            ->leftJoin('master_kec as mkec', function ($join) {
+                $join->whereRaw("mkec.kode_bps = CONCAT('16', subsls.kode_kab, subsls.kode_kec)");
+            })
+            ->leftJoin('master_desa as mdes', function ($join) {
+                $join->whereRaw("mdes.kode_bps = CONCAT('16', subsls.kode_kab, subsls.kode_kec, subsls.kode_desa)");
+            })
+            ->orderBy('subsls.id');
+
+        if ($kodeKabUser !== '00') {
+            $query->where('subsls.kode_kab', $kodeKabUser);
+        }
+
+        return $query
+            ->when($selectedKab !== '', fn ($q) => $q->where('subsls.kode_kab', $selectedKab))
+            ->when($selectedKec !== '', fn ($q) => $q->where('subsls.kode_kec', $selectedKec))
+            ->when($selectedDesa !== '', fn ($q) => $q->where('subsls.kode_desa', $selectedDesa));
     }
 }

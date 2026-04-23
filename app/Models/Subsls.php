@@ -46,4 +46,12 @@ class Subsls extends Model
         'se26_diperiksa' => 'integer',
         'se2026_is_finish' => 'integer',
     ];
+
+    /**
+     * Alias for se2026_is_finish (API/UI label se26_is_finish).
+     */
+    public function getSe26IsFinishAttribute(): int
+    {
+        return (int) ($this->attributes['se2026_is_finish'] ?? 0);
+    }
 }
