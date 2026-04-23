@@ -7,7 +7,9 @@ use App\Models\MasterDesa;
 use App\Models\MasterKako;
 use App\Models\MasterKec;
 use App\Models\Subsls;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -18,16 +20,39 @@ class SubslsController extends Controller
      */
     public function indexPage(Request $request): View
     {
-        $items = $this->buildSubslsPageQuery($request)
-            ->paginate(20);
+        $perPage = 20;
+        $page = max((int) $request->get('page', 1), 1);
+
+        $total = $this->applySubslsFilters(Subsls::query(), $request)->count('subsls.id');
+        $rows = $this->buildSubslsRowsQuery($request)
+            ->forPage($page, $perPage)
+            ->get();
+
+        $items = new LengthAwarePaginator(
+            $rows,
+            $total,
+            $perPage,
+            $page,
+            [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]
+        );
 
         return view('subsls.index', ['items' => $items]);
     }
 
     public function listData(Request $request): JsonResponse
     {
-        $items = $this->buildSubslsPageQuery($request)
-            ->paginate(20, ['*'], 'page', (int) $request->get('page', 1));
+        $perPage = 20;
+        $page = max((int) $request->get('page', 1), 1);
+
+        $total = $this->applySubslsFilters(Subsls::query(), $request)->count('subsls.id');
+        $rows = $this->buildSubslsRowsQuery($request)
+            ->forPage($page, $perPage)
+            ->get();
+
+        $items = new LengthAwarePaginator($rows, $total, $perPage, $page);
 
         return response()->json([
             'data' => $items->items(),
@@ -297,13 +322,8 @@ class SubslsController extends Controller
         return $item->kode_kab === $kodeKab;
     }
 
-    private function buildSubslsPageQuery(Request $request)
+    private function buildSubslsRowsQuery(Request $request): Builder
     {
-        $kodeKabUser = $request->user()?->kode_kab ?? '00';
-        $selectedKab = (string) $request->get('kode_kab', '');
-        $selectedKec = (string) $request->get('kode_kec', '');
-        $selectedDesa = (string) $request->get('kode_desa', '');
-
         $query = Subsls::query()
             ->select([
                 'subsls.id',
@@ -314,20 +334,18 @@ class SubslsController extends Controller
                 'subsls.kode_kab',
                 'subsls.kode_kec',
                 'subsls.kode_desa',
-                'mk.nama_bps as nama_kabupaten_kota',
-                'mkec.nama_bps as nama_kecamatan',
-                'mdes.nama_bps as nama_desa_kelurahan',
             ])
-            ->leftJoin('master_kako as mk', function ($join) {
-                $join->whereRaw("mk.kode_bps = CONCAT('16', subsls.kode_kab)");
-            })
-            ->leftJoin('master_kec as mkec', function ($join) {
-                $join->whereRaw("mkec.kode_bps = CONCAT('16', subsls.kode_kab, subsls.kode_kec)");
-            })
-            ->leftJoin('master_desa as mdes', function ($join) {
-                $join->whereRaw("mdes.kode_bps = CONCAT('16', subsls.kode_kab, subsls.kode_kec, subsls.kode_desa)");
-            })
             ->orderBy('subsls.id');
+
+        return $this->applySubslsFilters($query, $request);
+    }
+
+    private function applySubslsFilters(Builder $query, Request $request): Builder
+    {
+        $kodeKabUser = $request->user()?->kode_kab ?? '00';
+        $selectedKab = (string) $request->get('kode_kab', '');
+        $selectedKec = (string) $request->get('kode_kec', '');
+        $selectedDesa = (string) $request->get('kode_desa', '');
 
         if ($kodeKabUser !== '00') {
             $query->where('subsls.kode_kab', $kodeKabUser);

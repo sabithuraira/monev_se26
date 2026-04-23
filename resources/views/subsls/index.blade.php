@@ -71,9 +71,9 @@
                         <tr>
                             <td class="text-center">{{ $items->firstItem() + $loop->index }}</td>
                             <td>{{ $row->nama_sls }}</td>
-                            <td>{{ $row->nama_kabupaten_kota ?? '—' }}</td>
-                            <td>{{ $row->nama_kecamatan ?? '—' }}</td>
-                            <td>{{ $row->nama_desa_kelurahan ?? '—' }}</td>
+                            <td>{{ $row->kab ?: '—' }}</td>
+                            <td>{{ $row->kecamatan ?: '—' }}</td>
+                            <td>{{ $row->desa ?: '—' }}</td>
                             <td class="text-center">{{ $row->se26_selesai }}</td>
                             <td class="text-center">{{ $row->se26_diperiksa }}</td>
                             <td class="text-center">{{ $row->se26_is_finish }}</td>
@@ -150,9 +150,9 @@
                 return '<tr>' +
                     '<td class="text-center">' + nomor + '</td>' +
                     '<td>' + (row.nama_sls || '—') + '</td>' +
-                    '<td>' + (row.nama_kabupaten_kota || '—') + '</td>' +
-                    '<td>' + (row.nama_kecamatan || '—') + '</td>' +
-                    '<td>' + (row.nama_desa_kelurahan || '—') + '</td>' +
+                    '<td>' + (row.kab || '—') + '</td>' +
+                    '<td>' + (row.kecamatan || '—') + '</td>' +
+                    '<td>' + (row.desa || '—') + '</td>' +
                     '<td class="text-center">' + (row.se26_selesai ?? 0) + '</td>' +
                     '<td class="text-center">' + (row.se26_diperiksa ?? 0) + '</td>' +
                     '<td class="text-center">' + (finish ?? 0) + '</td>' +

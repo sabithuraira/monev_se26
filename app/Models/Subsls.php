@@ -47,11 +47,42 @@ class Subsls extends Model
         'se2026_is_finish' => 'integer',
     ];
 
+    protected $appends = [
+        'se26_is_finish',
+        'kab',
+        'kecamatan',
+        'desa',
+    ];
+
     /**
      * Alias for se2026_is_finish (API/UI label se26_is_finish).
      */
     public function getSe26IsFinishAttribute(): int
     {
         return (int) ($this->attributes['se2026_is_finish'] ?? 0);
+    }
+
+    public function getKabAttribute(): string
+    {
+        $kodeBps = '16'.($this->kode_kab ?? '');
+        $data = MasterKako::where('kode_bps', $kodeBps)->first();
+
+        return $data->nama_bps ?? $data->nama_pum ?? '';
+    }
+
+    public function getKecamatanAttribute(): string
+    {
+        $kodeBps = '16'.($this->kode_kab ?? '').($this->kode_kec ?? '');
+        $data = MasterKec::where('kode_bps', $kodeBps)->first();
+
+        return $data->nama_bps ?? $data->nama_pum ?? '';
+    }
+
+    public function getDesaAttribute(): string
+    {
+        $kodeBps = '16'.($this->kode_kab ?? '').($this->kode_kec ?? '').($this->kode_desa ?? '');
+        $data = MasterDesa::where('kode_bps', $kodeBps)->first();
+
+        return $data->nama_bps ?? $data->nama_pum ?? '';
     }
 }
