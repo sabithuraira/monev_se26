@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MasterDesaController;
 use App\Http\Controllers\MasterKakoController;
 use App\Http\Controllers\MasterKecController;
@@ -20,4 +21,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('master-kec', MasterKecController::class)->parameters(['master_kec' => 'id']);
     Route::apiResource('master-desa', MasterDesaController::class)->parameters(['master_desa' => 'id']);
     Route::apiResource('subsls', SubslsController::class)->parameters(['subsls' => 'id']);
+
+    Route::get('histogram_kecamatan', [DashboardController::class, "histogram_kecamatan"]);
+    Route::get('histogram_desa', [DashboardController::class, "histogram_desa"]);
 });

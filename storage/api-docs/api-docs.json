@@ -161,6 +161,146 @@
                 ]
             }
         },
+        "/api/histogram_kecamatan": {
+            "get": {
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "List or get Histogram Kecamatan For Kabupaten/Kota",
+                "description": "List paginated records, or get single by kode_bps. Requires Bearer token. Access scoped by user kode_kab.",
+                "operationId": "4e20dbff0cf720ea03d02bfd34dbde85",
+                "parameters": [
+                    {
+                        "name": "kode_bps",
+                        "in": "query",
+                        "description": "Get single record by kode_bps (e.g. 1601)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page (1-1000) when listing",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "description": "Single object or array of items"
+                                        },
+                                        "meta": {
+                                            "description": "Pagination meta (when list)",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Data not found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/histogram_desa": {
+            "get": {
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "List or get Histogram Desa For Kabupaten/Kota",
+                "description": "List paginated records, or get single by kode_bps. Requires Bearer token. Access scoped by user kode_kab.",
+                "operationId": "af13169b0358f28829fe2987c82133c6",
+                "parameters": [
+                    {
+                        "name": "kode_bps",
+                        "in": "query",
+                        "description": "Get single record by kode_bps (e.g. 1601010)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page (1-1000) when listing",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "description": "Single object or array of items"
+                                        },
+                                        "meta": {
+                                            "description": "Pagination meta (when list)",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Data not found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/master-desa": {
             "get": {
                 "tags": [
@@ -1672,6 +1812,10 @@
         {
             "name": "Auth",
             "description": "Auth"
+        },
+        {
+            "name": "Dashboard",
+            "description": "Dashboard"
         },
         {
             "name": "Master Desa",
