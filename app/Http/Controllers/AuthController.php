@@ -58,7 +58,7 @@ class AuthController extends Controller
 
         /** @var User $user */
         $user = Auth::guard('web')->user();
-        $user->tokens()->delete(); // revoke previous tokens (single device) or remove this for multiple devices
+        // $user->tokens()->delete(); // revoke previous tokens (single device) or remove this for multiple devices
 
         $token = $user->createToken('api')->plainTextToken;
 

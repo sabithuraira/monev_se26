@@ -34,8 +34,8 @@ class MasterKec extends Model
     public function getKodeKecAttribute(){
         // Extract last 2 digits from kode_bps (e.g., "1601052" -> "52")
         $code = $this->kode_bps ?? $this->kode_pum ?? '';
-        if (strlen($code) >= 2) {
-            return substr($code, -2);
+        if (strlen($code) >= 3) {
+            return substr($code, -3);
         }
         return $code;
     }
