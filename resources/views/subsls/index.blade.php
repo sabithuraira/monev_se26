@@ -61,9 +61,9 @@
                         <th>Kabupaten/Kota</th>
                         <th>Kecamatan</th>
                         <th>Desa/Kelurahan</th>
-                        <th>se26_selesai</th>
-                        <th>se26_diperiksa</th>
-                        <th>se26_is_finish</th>
+                        <th>Jumlah Selesai</th>
+                        <th>Jumlah Diperiksa</th>
+                        <th>Status SLS Selesai</th>
                     </tr>
                     </thead>
                     <tbody id="subsls-tbody">

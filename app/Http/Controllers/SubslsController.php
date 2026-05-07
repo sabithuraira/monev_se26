@@ -9,8 +9,9 @@ use App\Models\MasterKec;
 use App\Models\Subsls;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class SubslsController extends Controller
@@ -114,6 +115,157 @@ class SubslsController extends Controller
             ->get();
 
         return response()->json(['data' => $options]);
+    }
+
+    public function rekap(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'kode_prov' => 'required|string|size:2',
+            'kode_kab' => 'nullable|string|size:2',
+            'kode_kec' => 'nullable|string|size:3',
+            'kode_desa' => 'nullable|string|size:3',
+        ]);
+
+        $kodeProv = (string) $validated['kode_prov'];
+        $kodeKab = (string) ($validated['kode_kab'] ?? '');
+        $kodeKec = (string) ($validated['kode_kec'] ?? '');
+        $kodeDesa = (string) ($validated['kode_desa'] ?? '');
+
+        if ($kodeKab === '' && ($kodeKec !== '' || $kodeDesa !== '')) {
+            return response()->json(['message' => 'Parameter hierarchy invalid. kode_kec/kode_desa requires kode_kab.'], 422);
+        }
+        if ($kodeKec === '' && $kodeDesa !== '') {
+            return response()->json(['message' => 'Parameter hierarchy invalid. kode_desa requires kode_kec.'], 422);
+        }
+
+        $userKodeKab = $request->user()?->kode_kab ?? '00';
+        if ($userKodeKab !== '00') {
+            if ($kodeKab !== '' && $kodeKab !== $userKodeKab) {
+                return response()->json(['message' => 'Forbidden. You can only access data for your kabupaten.'], 403);
+            }
+            $kodeKab = $userKodeKab;
+        }
+
+        if ($kodeKab === '') {
+            $rows = Subsls::query()
+                ->select([
+                    'subsls.kode_kab',
+                    DB::raw('COALESCE(master_kako.nama_bps, master_kako.nama_pum, "") as nama_wilayah'),
+                    DB::raw('COUNT(*) as total_data'),
+                    DB::raw('SUM(subsls.se26_selesai) as total_se26_selesai'),
+                    DB::raw('SUM(subsls.se26_diperiksa) as total_se26_diperiksa'),
+                    DB::raw('SUM(subsls.se2026_is_finish) as total_se26_is_finish'),
+                ])
+                ->leftJoin('master_kako', 'master_kako.kode_bps', '=', DB::raw('CONCAT(subsls.kode_prov, subsls.kode_kab)'))
+                ->where('subsls.kode_prov', $kodeProv)
+                ->groupBy('subsls.kode_kab', 'master_kako.nama_bps', 'master_kako.nama_pum')
+                ->orderBy('subsls.kode_kab')
+                ->get()
+                ->map(fn ($row) => [
+                    'kode_prov' => $kodeProv,
+                    'kode_kab' => $row->kode_kab,
+                    'nama_wilayah' => $row->nama_wilayah,
+                    'total_data' => (int) $row->total_data,
+                    'total_se26_selesai' => (int) $row->total_se26_selesai,
+                    'total_se26_diperiksa' => (int) $row->total_se26_diperiksa,
+                    'total_se26_is_finish' => (int) $row->total_se26_is_finish,
+                ]);
+
+            return response()->json(['level' => 'kabupaten', 'data' => $rows]);
+        }
+
+        if ($kodeKec === '') {
+            $rows = Subsls::query()
+                ->select([
+                    'subsls.kode_kec',
+                    DB::raw('COALESCE(master_kec.nama_bps, master_kec.nama_pum, "") as nama_wilayah'),
+                    DB::raw('COUNT(*) as total_data'),
+                    DB::raw('SUM(subsls.se26_selesai) as total_se26_selesai'),
+                    DB::raw('SUM(subsls.se26_diperiksa) as total_se26_diperiksa'),
+                    DB::raw('SUM(subsls.se2026_is_finish) as total_se26_is_finish'),
+                ])
+                ->leftJoin('master_kec', 'master_kec.kode_bps', '=', DB::raw('CONCAT(subsls.kode_prov, subsls.kode_kab, subsls.kode_kec)'))
+                ->where('subsls.kode_prov', $kodeProv)
+                ->where('subsls.kode_kab', $kodeKab)
+                ->groupBy('subsls.kode_kec', 'master_kec.nama_bps', 'master_kec.nama_pum')
+                ->orderBy('subsls.kode_kec')
+                ->get()
+                ->map(fn ($row) => [
+                    'kode_prov' => $kodeProv,
+                    'kode_kab' => $kodeKab,
+                    'kode_kec' => $row->kode_kec,
+                    'nama_wilayah' => $row->nama_wilayah,
+                    'total_data' => (int) $row->total_data,
+                    'total_se26_selesai' => (int) $row->total_se26_selesai,
+                    'total_se26_diperiksa' => (int) $row->total_se26_diperiksa,
+                    'total_se26_is_finish' => (int) $row->total_se26_is_finish,
+                ]);
+
+            return response()->json(['level' => 'kecamatan', 'data' => $rows]);
+        }
+
+        if ($kodeDesa === '') {
+            $rows = Subsls::query()
+                ->select([
+                    'subsls.kode_desa',
+                    DB::raw('COALESCE(master_desa.nama_bps, master_desa.nama_pum, "") as nama_wilayah'),
+                    DB::raw('COUNT(*) as total_data'),
+                    DB::raw('SUM(subsls.se26_selesai) as total_se26_selesai'),
+                    DB::raw('SUM(subsls.se26_diperiksa) as total_se26_diperiksa'),
+                    DB::raw('SUM(subsls.se2026_is_finish) as total_se26_is_finish'),
+                ])
+                ->leftJoin('master_desa', 'master_desa.kode_bps', '=', DB::raw('CONCAT(subsls.kode_prov, subsls.kode_kab, subsls.kode_kec, subsls.kode_desa)'))
+                ->where('subsls.kode_prov', $kodeProv)
+                ->where('subsls.kode_kab', $kodeKab)
+                ->where('subsls.kode_kec', $kodeKec)
+                ->groupBy('subsls.kode_desa', 'master_desa.nama_bps', 'master_desa.nama_pum')
+                ->orderBy('subsls.kode_desa')
+                ->get()
+                ->map(fn ($row) => [
+                    'kode_prov' => $kodeProv,
+                    'kode_kab' => $kodeKab,
+                    'kode_kec' => $kodeKec,
+                    'kode_desa' => $row->kode_desa,
+                    'nama_wilayah' => $row->nama_wilayah,
+                    'total_data' => (int) $row->total_data,
+                    'total_se26_selesai' => (int) $row->total_se26_selesai,
+                    'total_se26_diperiksa' => (int) $row->total_se26_diperiksa,
+                    'total_se26_is_finish' => (int) $row->total_se26_is_finish,
+                ]);
+
+            return response()->json(['level' => 'desa', 'data' => $rows]);
+        }
+
+        $rows = Subsls::query()
+            ->select([
+                'subsls.kode_sls',
+                DB::raw('MAX(subsls.nama_sls) as nama_sls'),
+                DB::raw('COUNT(*) as total_data'),
+                DB::raw('SUM(subsls.se26_selesai) as total_se26_selesai'),
+                DB::raw('SUM(subsls.se26_diperiksa) as total_se26_diperiksa'),
+                DB::raw('SUM(subsls.se2026_is_finish) as total_se26_is_finish'),
+            ])
+            ->where('subsls.kode_prov', $kodeProv)
+            ->where('subsls.kode_kab', $kodeKab)
+            ->where('subsls.kode_kec', $kodeKec)
+            ->where('subsls.kode_desa', $kodeDesa)
+            ->groupBy('subsls.kode_sls')
+            ->orderBy('subsls.kode_sls')
+            ->get()
+            ->map(fn ($row) => [
+                'kode_prov' => $kodeProv,
+                'kode_kab' => $kodeKab,
+                'kode_kec' => $kodeKec,
+                'kode_desa' => $kodeDesa,
+                'kode_sls' => $row->kode_sls,
+                'nama_sls' => $row->nama_sls,
+                'total_data' => (int) $row->total_data,
+                'total_se26_selesai' => (int) $row->total_se26_selesai,
+                'total_se26_diperiksa' => (int) $row->total_se26_diperiksa,
+                'total_se26_is_finish' => (int) $row->total_se26_is_finish,
+            ]);
+
+        return response()->json(['level' => 'sls', 'data' => $rows]);
     }
 
     /**
