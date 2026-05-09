@@ -22,6 +22,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('master-kec', MasterKecController::class)->parameters(['master_kec' => 'id']);
     Route::apiResource('master-desa', MasterDesaController::class)->parameters(['master_desa' => 'id']);
     Route::apiResource('subsls', SubslsController::class)->parameters(['subsls' => 'id']);
+    Route::get('subsls-rekap', [SubslsController::class, 'rekap']);
     Route::apiResource('information', InformationController::class)->parameters(['information' => 'id']);
 
     Route::get('histogram_kecamatan', [DashboardController::class, 'histogram_kecamatan']);

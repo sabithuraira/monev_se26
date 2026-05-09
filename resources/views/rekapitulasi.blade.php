@@ -48,6 +48,35 @@
         </div>
     </div>
 
+    <p class="text-muted small mb-3" id="rekap-total-sls">Total SLS: —</p>
+
+    <div class="row g-3 mb-4 text-center">
+        <div class="col-6 col-md-3">
+            <div class="card p-3 h-100 shadow-sm border-0">
+                <h6 class="text-muted small fw-bold mt-2">Total Progres Muatan</h6>
+                <div id="chartRekapProgres"></div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card bg-success text-white p-3 h-100 shadow-sm border-0">
+                <h6 class="small fw-bold mt-2">Persentase Selesai</h6>
+                <h1 class="fw-bold mb-0" style="font-size: 3rem;" id="pct-selesai">0%</h1>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card bg-warning text-dark p-3 h-100 shadow-sm border-0">
+                <h6 class="small fw-bold mt-2">Persentase Sedang Dikerjakan</h6>
+                <h1 class="fw-bold mb-0" style="font-size: 3rem;" id="pct-sedang">0%</h1>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card bg-danger text-white p-3 h-100 shadow-sm border-0">
+                <h6 class="small fw-bold mt-2">Persentase Belum Dikerjakan</h6>
+                <h1 class="fw-bold mb-0" style="font-size: 3rem;" id="pct-belum">0%</h1>
+            </div>
+        </div>
+    </div>
+
     <div class="table-container shadow-sm bg-white p-4 rounded-3 border-0">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="fw-bold mb-0"><i class="fas fa-table text-primary"></i> Tabel Rekapitulasi</h5>
@@ -93,6 +122,11 @@
     var tbodyEl = document.getElementById('rekap-tbody');
     var resetEl = document.getElementById('btn-reset');
     var levelLabelEl = document.getElementById('rekap-level-label');
+    var totalSlsEl = document.getElementById('rekap-total-sls');
+    var pctSelesaiEl = document.getElementById('pct-selesai');
+    var pctSedangEl = document.getElementById('pct-sedang');
+    var pctBelumEl = document.getElementById('pct-belum');
+    var rekapProgresChart = null;
 
     function buildUrl(base, params) {
         var url = new URL(base, window.location.origin);
@@ -140,6 +174,45 @@
     function rowName(row, level) {
         if (level === 'sls') return row.nama_sls || '-';
         return row.nama_wilayah || '-';
+    }
+
+    function renderSummary(summary) {
+        summary = summary || {};
+        var total = Number(summary.total_sls ?? 0);
+        totalSlsEl.textContent = 'Total SLS: ' + total;
+
+        var pMuatan = Number(summary.persen_total_progres_muatan ?? 0);
+        var pSelesai = Number(summary.persen_selesai ?? 0);
+        var pSedang = Number(summary.persen_sedang_dikerjakan ?? 0);
+        var pBelum = Number(summary.persen_belum_dikerjakan ?? 0);
+
+        pctSelesaiEl.textContent = pSelesai.toFixed(2) + '%';
+        pctSedangEl.textContent = pSedang.toFixed(2) + '%';
+        pctBelumEl.textContent = pBelum.toFixed(2) + '%';
+
+        if (typeof ApexCharts === 'undefined') {
+            return;
+        }
+
+        if (!rekapProgresChart) {
+            rekapProgresChart = new ApexCharts(document.querySelector('#chartRekapProgres'), {
+                series: [pMuatan],
+                chart: { height: 180, type: 'radialBar' },
+                plotOptions: {
+                    radialBar: {
+                        hollow: { size: '60%' },
+                        dataLabels: {
+                            name: { show: false },
+                            value: { formatter: function (val) { return val + '%'; } }
+                        }
+                    }
+                },
+                colors: ['#0d6efd']
+            });
+            rekapProgresChart.render();
+        } else {
+            rekapProgresChart.updateSeries([pMuatan]);
+        }
     }
 
     function renderTable(level, rows) {
@@ -245,8 +318,21 @@
         });
 
         return fetch(url)
-            .then(function (res) { return res.json(); })
-            .then(function (json) {
+            .then(function (res) {
+                return res.json().then(function (body) {
+                    return { ok: res.ok, body: body };
+                });
+            })
+            .then(function (r) {
+                if (! r.ok) {
+                    renderSummary({});
+                    levelLabelEl.textContent = 'Level: —';
+                    tbodyEl.innerHTML = '<tr><td colspan="7" class="text-center text-danger py-4">' +
+                        (r.body && r.body.message ? r.body.message : 'Gagal memuat data.') + '</td></tr>';
+                    return;
+                }
+                var json = r.body;
+                renderSummary(json.summary || {});
                 renderTable(json.level || '-', json.data || []);
             });
     }

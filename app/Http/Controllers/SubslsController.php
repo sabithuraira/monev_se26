@@ -119,32 +119,18 @@ class SubslsController extends Controller
 
     public function rekap(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'kode_prov' => 'required|string|size:2',
-            'kode_kab' => 'nullable|string|size:2',
-            'kode_kec' => 'nullable|string|size:3',
-            'kode_desa' => 'nullable|string|size:3',
-        ]);
-
-        $kodeProv = (string) $validated['kode_prov'];
-        $kodeKab = (string) ($validated['kode_kab'] ?? '');
-        $kodeKec = (string) ($validated['kode_kec'] ?? '');
-        $kodeDesa = (string) ($validated['kode_desa'] ?? '');
-
-        if ($kodeKab === '' && ($kodeKec !== '' || $kodeDesa !== '')) {
-            return response()->json(['message' => 'Parameter hierarchy invalid. kode_kec/kode_desa requires kode_kab.'], 422);
-        }
-        if ($kodeKec === '' && $kodeDesa !== '') {
-            return response()->json(['message' => 'Parameter hierarchy invalid. kode_desa requires kode_kec.'], 422);
+        $resolved = $this->resolveRekapFilters($request);
+        if ($resolved instanceof JsonResponse) {
+            return $resolved;
         }
 
-        $userKodeKab = $request->user()?->kode_kab ?? '00';
-        if ($userKodeKab !== '00') {
-            if ($kodeKab !== '' && $kodeKab !== $userKodeKab) {
-                return response()->json(['message' => 'Forbidden. You can only access data for your kabupaten.'], 403);
-            }
-            $kodeKab = $userKodeKab;
-        }
+        $kodeProv = $resolved['kode_prov'];
+        $kodeKab = $resolved['kode_kab'];
+        $kodeKec = $resolved['kode_kec'];
+        $kodeDesa = $resolved['kode_desa'];
+
+        $baseQuery = $this->buildRekapFilteredSubslsQuery($kodeProv, $kodeKab, $kodeKec, $kodeDesa);
+        $summary = $this->computeRekapProgressSummary($baseQuery);
 
         if ($kodeKab === '') {
             $rows = Subsls::query()
@@ -171,7 +157,7 @@ class SubslsController extends Controller
                     'total_se26_is_finish' => (int) $row->total_se26_is_finish,
                 ]);
 
-            return response()->json(['level' => 'kabupaten', 'data' => $rows]);
+            return response()->json(['level' => 'kabupaten', 'data' => $rows, 'summary' => $summary]);
         }
 
         if ($kodeKec === '') {
@@ -201,7 +187,7 @@ class SubslsController extends Controller
                     'total_se26_is_finish' => (int) $row->total_se26_is_finish,
                 ]);
 
-            return response()->json(['level' => 'kecamatan', 'data' => $rows]);
+            return response()->json(['level' => 'kecamatan', 'data' => $rows, 'summary' => $summary]);
         }
 
         if ($kodeDesa === '') {
@@ -233,7 +219,7 @@ class SubslsController extends Controller
                     'total_se26_is_finish' => (int) $row->total_se26_is_finish,
                 ]);
 
-            return response()->json(['level' => 'desa', 'data' => $rows]);
+            return response()->json(['level' => 'desa', 'data' => $rows, 'summary' => $summary]);
         }
 
         $rows = Subsls::query()
@@ -265,7 +251,111 @@ class SubslsController extends Controller
                 'total_se26_is_finish' => (int) $row->total_se26_is_finish,
             ]);
 
-        return response()->json(['level' => 'sls', 'data' => $rows]);
+        return response()->json(['level' => 'sls', 'data' => $rows, 'summary' => $summary]);
+    }
+
+    /**
+     * @return JsonResponse|array{kode_prov: string, kode_kab: string, kode_kec: string, kode_desa: string}
+     */
+    private function resolveRekapFilters(Request $request): JsonResponse|array
+    {
+        $validated = $request->validate([
+            'kode_prov' => 'required|string|size:2',
+            'kode_kab' => 'nullable|string|size:2',
+            'kode_kec' => 'nullable|string|size:3',
+            'kode_desa' => 'nullable|string|size:3',
+        ]);
+
+        $kodeProv = (string) $validated['kode_prov'];
+        $kodeKab = (string) ($validated['kode_kab'] ?? '');
+        $kodeKec = (string) ($validated['kode_kec'] ?? '');
+        $kodeDesa = (string) ($validated['kode_desa'] ?? '');
+
+        if ($kodeKab === '' && ($kodeKec !== '' || $kodeDesa !== '')) {
+            return response()->json(['message' => 'Parameter hierarchy invalid. kode_kec/kode_desa requires kode_kab.'], 422);
+        }
+        if ($kodeKec === '' && $kodeDesa !== '') {
+            return response()->json(['message' => 'Parameter hierarchy invalid. kode_desa requires kode_kec.'], 422);
+        }
+
+        $userKodeKab = $request->user()?->kode_kab ?? '00';
+        if ($userKodeKab !== '00') {
+            if ($kodeKab !== '' && $kodeKab !== $userKodeKab) {
+                return response()->json(['message' => 'Forbidden. You can only access data for your kabupaten.'], 403);
+            }
+            $kodeKab = $userKodeKab;
+        }
+
+        return [
+            'kode_prov' => $kodeProv,
+            'kode_kab' => $kodeKab,
+            'kode_kec' => $kodeKec,
+            'kode_desa' => $kodeDesa,
+        ];
+    }
+
+    private function buildRekapFilteredSubslsQuery(string $kodeProv, string $kodeKab, string $kodeKec, string $kodeDesa): Builder
+    {
+        $query = Subsls::query()->where('kode_prov', $kodeProv);
+
+        if ($kodeKab !== '') {
+            $query->where('kode_kab', $kodeKab);
+        }
+        if ($kodeKec !== '') {
+            $query->where('kode_kec', $kodeKec);
+        }
+        if ($kodeDesa !== '') {
+            $query->where('kode_desa', $kodeDesa);
+        }
+
+        return $query;
+    }
+
+    /**
+     * Percentages are share of total SLS rows in the current filter scope.
+     *
+     * @return array{
+     *     total_sls: int,
+     *     persen_total_progres_muatan: float,
+     *     persen_selesai: float,
+     *     persen_sedang_dikerjakan: float,
+     *     persen_belum_dikerjakan: float
+     * }
+     */
+    private function computeRekapProgressSummary(Builder $base): array
+    {
+        $total = (clone $base)->count();
+
+        if ($total === 0) {
+            return [
+                'total_sls' => 0,
+                'persen_total_progres_muatan' => 0.0,
+                'persen_selesai' => 0.0,
+                'persen_sedang_dikerjakan' => 0.0,
+                'persen_belum_dikerjakan' => 0.0,
+            ];
+        }
+
+        $progresMuatan = (clone $base)->where(function ($q) {
+            $q->where('se2026_is_finish', 1)
+                ->orWhereRaw('COALESCE(se26_selesai, 0) <> 0');
+        })->count();
+
+        $selesai = (clone $base)->where('se2026_is_finish', 1)->count();
+
+        $sedangDikerjakan = (clone $base)->whereRaw('COALESCE(se26_selesai, 0) <> 0')->count();
+
+        $belumDikerjakan = (clone $base)->whereRaw('COALESCE(se2026_is_finish, 0) = 0 AND COALESCE(se26_selesai, 0) = 0')->count();
+
+        $pct = fn (int $n): float => round(($n / $total) * 100, 2);
+
+        return [
+            'total_sls' => $total,
+            'persen_total_progres_muatan' => $pct($progresMuatan),
+            'persen_selesai' => $pct($selesai),
+            'persen_sedang_dikerjakan' => $pct($sedangDikerjakan),
+            'persen_belum_dikerjakan' => $pct($belumDikerjakan),
+        ];
     }
 
     /**
