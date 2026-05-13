@@ -82,10 +82,10 @@
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
         </div>
         <div class="offcanvas-body p-0">
-            <a href="/dashboard"><i class="fas fa-tachometer-alt me-2"></i> Dashboard Wilayah</a>
+            <a href="/"><i class="fas fa-tachometer-alt me-2"></i> Dashboard Wilayah</a>
             <a href="/rekapitulasi"><i class="fas fa-table-list me-2"></i> Rekapitulasi</a>
             <a href="/hasil-klaster"><i class="fas fa-robot me-2"></i> Hasil Klaster</a>
-            <a href="/"><i class="fas fa-table me-2"></i> Data Subsls</a>
+            <a href="/data-subsls"><i class="fas fa-table me-2"></i> Data Subsls</a>
         </div>
     </div>
 

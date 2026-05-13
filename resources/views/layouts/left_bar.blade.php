@@ -9,7 +9,7 @@
         <div class="badge bg-primary text-uppercase mb-2">Admin</div>
     </div>
     <div class="flex-grow-1">
-        <a href="/dashboard" class="{{ request()->is('dashboard') ? 'active' : '' }}">
+        <a href="/" class="{{ request()->is('/') || request()->is('dashboard') ? 'active' : '' }}">
             <i class="fas fa-tachometer-alt me-2"></i> Dashboard Wilayah
         </a>
         <a href="/rekapitulasi" class="{{ request()->is('rekapitulasi') ? 'active' : '' }}">
@@ -18,7 +18,7 @@
         <a href="/hasil-klaster" class="{{ request()->is('hasil-klaster') ? 'active' : '' }}">
             <i class="fas fa-robot me-2"></i> Hasil Klaster
         </a>
-        <a href="/" class="{{ request()->is('/') ? 'active' : '' }}">
+        <a href="/data-subsls" class="{{ request()->is('data-subsls') ? 'active' : '' }}">
             <i class="fas fa-table me-2"></i> Data Subsls
         </a>
     </div>

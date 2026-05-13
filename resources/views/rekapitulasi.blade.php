@@ -77,6 +77,14 @@
         </div>
     </div>
 
+    <div class="card mb-4 shadow-sm border-0">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-2"><i class="fas fa-chart-bar text-primary"></i> Grafik Rekapitulasi</h5>
+            <p class="text-muted small mb-0" id="rekap-chart-subtitle">Total Selesai, Total Diperiksa, dan SLS Selesai per baris rekap.</p>
+            <div id="chartRekapBar" class="mt-3" style="min-height: 280px;"></div>
+        </div>
+    </div>
+
     <div class="table-container shadow-sm bg-white p-4 rounded-3 border-0">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="fw-bold mb-0"><i class="fas fa-table text-primary"></i> Tabel Rekapitulasi</h5>
@@ -127,6 +135,7 @@
     var pctSedangEl = document.getElementById('pct-sedang');
     var pctBelumEl = document.getElementById('pct-belum');
     var rekapProgresChart = null;
+    var rekapBarChart = null;
 
     function buildUrl(base, params) {
         var url = new URL(base, window.location.origin);
@@ -266,6 +275,94 @@
         tbodyEl.innerHTML = bodyRows + totalRow;
     }
 
+    function renderRekapBarChart(level, rows) {
+        var el = document.getElementById('chartRekapBar');
+        var subtitleEl = document.getElementById('rekap-chart-subtitle');
+        if (! el || typeof ApexCharts === 'undefined') {
+            return;
+        }
+
+        if (subtitleEl) {
+            subtitleEl.textContent = 'Level: ' + labelLevel(level) +
+                ' — Total Selesai, Total Diperiksa, dan SLS Selesai per wilayah.';
+        }
+
+        if (rekapBarChart) {
+            rekapBarChart.destroy();
+            rekapBarChart = null;
+        }
+
+        el.innerHTML = '';
+
+        if (!rows || !rows.length) {
+            el.innerHTML = '<p class="text-muted text-center py-5 mb-0">Tidak ada data untuk grafik.</p>';
+            return;
+        }
+
+        var categories = rows.map(function (row) {
+            var code = rowCode(row, level);
+            var name = rowName(row, level);
+            var nm = (name && name !== '—') ? name : '';
+            var label = nm ? (code + ' · ' + (nm.length > 36 ? nm.substring(0, 36) + '…' : nm)) : String(code);
+            return label;
+        });
+
+        var selesai = rows.map(function (r) { return Number(r.total_se26_selesai ?? 0); });
+        var diperiksa = rows.map(function (r) { return Number(r.total_se26_diperiksa ?? 0); });
+        var slsFinish = rows.map(function (r) { return Number(r.total_se26_is_finish ?? 0); });
+
+        var height = Math.min(780, Math.max(300, rows.length * 46));
+
+        rekapBarChart = new ApexCharts(el, {
+            series: [
+                { name: 'Total Selesai', data: selesai },
+                { name: 'Total Diperiksa', data: diperiksa },
+                { name: 'SLS Selesai', data: slsFinish }
+            ],
+            chart: {
+                type: 'bar',
+                height: height,
+                stacked: false,
+                toolbar: { show: true },
+                fontFamily: 'Segoe UI, sans-serif',
+                zoom: { enabled: false }
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: true,
+                    borderRadius: 4,
+                    barHeight: '72%',
+                    dataLabels: { position: 'top' }
+                }
+            },
+            dataLabels: {
+                enabled: rows.length <= 12,
+                style: { fontSize: '10px' },
+                offsetX: 6
+            },
+            stroke: { show: true, width: 1, colors: ['#fff'] },
+            xaxis: {
+                categories: categories,
+                labels: { style: { fontSize: '11px' } }
+            },
+            yaxis: {
+                labels: {
+                    maxWidth: 220,
+                    style: { fontSize: '11px' }
+                }
+            },
+            colors: ['#198754', '#0d6efd', '#6f42c1'],
+            legend: {
+                position: 'top',
+                horizontalAlign: 'right',
+                fontSize: '12px'
+            },
+            grid: { borderColor: '#e9ecef', strokeDashArray: 4 },
+            tooltip: { shared: true, intersect: false }
+        });
+        rekapBarChart.render();
+    }
+
     function loadKabupaten() {
         return fetch('{{ url('/subsls/options/kabupaten') }}')
             .then(function (res) { return res.json(); })
@@ -329,11 +426,15 @@
                     levelLabelEl.textContent = 'Level: —';
                     tbodyEl.innerHTML = '<tr><td colspan="7" class="text-center text-danger py-4">' +
                         (r.body && r.body.message ? r.body.message : 'Gagal memuat data.') + '</td></tr>';
+                    renderRekapBarChart('-', []);
                     return;
                 }
                 var json = r.body;
                 renderSummary(json.summary || {});
-                renderTable(json.level || '-', json.data || []);
+                var level = json.level || '-';
+                var dataRows = json.data || [];
+                renderTable(level, dataRows);
+                renderRekapBarChart(level, dataRows);
             });
     }
 

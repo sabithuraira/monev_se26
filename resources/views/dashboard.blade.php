@@ -21,13 +21,6 @@
         </div>
     </div>
 
-    <div class="row g-3 mb-3 text-center">
-        <div class="col-6 col-md-3"><div class="card p-3 h-100"><h6 class="text-muted small fw-bold mt-2">TOTAL PROGRES MUATAN</h6><div id="chartProgres"></div></div></div>
-        <div class="col-6 col-md-3"><div class="card bg-success text-white p-3 h-100"><h6 class="small fw-bold mt-2">WILAYAH LANCAR</h6><h1 class="fw-bold mb-0" style="font-size: 3rem;">0</h1></div></div>
-        <div class="col-6 col-md-3"><div class="card bg-warning text-dark p-3 h-100"><h6 class="small fw-bold mt-2">WILAYAH WASPADA</h6><h1 class="fw-bold mb-0" style="font-size: 3rem;">0</h1></div></div>
-        <div class="col-6 col-md-3"><div class="card bg-danger text-white p-3 h-100"><h6 class="small fw-bold mt-2">WILAYAH TERKENDALA</h6><h1 class="fw-bold mb-0" style="font-size: 3rem;">0</h1></div></div>
-    </div>
-
     <div class="card mb-4 shadow-sm border-0">
         <div class="card-body p-3 bg-light rounded-3">
             <form id="filter-form">
@@ -57,6 +50,13 @@
                 </div>
             </form>
         </div>
+    </div>
+
+    <div class="row g-3 mb-3 text-center">
+        <div class="col-6 col-md-3"><div class="card p-3 h-100"><h6 class="text-muted small fw-bold mt-2">TOTAL PROGRES MUATAN</h6><div id="chartProgres"></div></div></div>
+        <div class="col-6 col-md-3"><div class="card bg-success text-white p-3 h-100"><h6 class="small fw-bold mt-2">WILAYAH LANCAR</h6><h1 class="fw-bold mb-0" style="font-size: 3rem;">0</h1></div></div>
+        <div class="col-6 col-md-3"><div class="card bg-warning text-dark p-3 h-100"><h6 class="small fw-bold mt-2">WILAYAH WASPADA</h6><h1 class="fw-bold mb-0" style="font-size: 3rem;">0</h1></div></div>
+        <div class="col-6 col-md-3"><div class="card bg-danger text-white p-3 h-100"><h6 class="small fw-bold mt-2">WILAYAH TERKENDALA</h6><h1 class="fw-bold mb-0" style="font-size: 3rem;">0</h1></div></div>
     </div>
 
     <div class="table-container shadow-sm bg-white p-4 rounded-3 border-0">
@@ -169,20 +169,46 @@ new ApexCharts(document.querySelector("#chartProgres"), {
         paginationEl.innerHTML = '';
         infoEl.textContent = 'Menampilkan ' + (meta.from || 0) + ' - ' + (meta.to || 0) + ' dari ' + meta.total + ' data';
 
-        if (meta.last_page <= 1) {
+        var last = meta.last_page || 1;
+        if (last <= 1) {
             return;
         }
+
+        var current = meta.current_page || 1;
+        var delta = 2;
 
         var makeItem = function (label, page, disabled, active) {
             return '<li class="page-item ' + (disabled ? 'disabled' : '') + ' ' + (active ? 'active' : '') + '">' +
                 '<a class="page-link" href="#" data-page="' + page + '">' + label + '</a></li>';
         };
 
-        paginationEl.innerHTML += makeItem('&laquo;', meta.current_page - 1, meta.current_page <= 1, false);
-        for (var i = 1; i <= meta.last_page; i++) {
-            paginationEl.innerHTML += makeItem(i, i, false, i === meta.current_page);
+        var makeEllipsis = function () {
+            return '<li class="page-item disabled"><span class="page-link user-select-none">&hellip;</span></li>';
+        };
+
+        var pageSet = {};
+        pageSet[1] = true;
+        pageSet[last] = true;
+        for (var i = current - delta; i <= current + delta; i++) {
+            if (i >= 1 && i <= last) {
+                pageSet[i] = true;
+            }
         }
-        paginationEl.innerHTML += makeItem('&raquo;', meta.current_page + 1, meta.current_page >= meta.last_page, false);
+        var pages = Object.keys(pageSet).map(function (k) { return parseInt(k, 10); }).sort(function (a, b) { return a - b; });
+
+        paginationEl.innerHTML += makeItem('&laquo;', current - 1, current <= 1, false);
+
+        var prev = 0;
+        for (var j = 0; j < pages.length; j++) {
+            var p = pages[j];
+            if (prev && p - prev > 1) {
+                paginationEl.innerHTML += makeEllipsis();
+            }
+            paginationEl.innerHTML += makeItem(String(p), p, false, p === current);
+            prev = p;
+        }
+
+        paginationEl.innerHTML += makeItem('&raquo;', current + 1, current >= last, false);
     }
 
     function loadSubsls(page) {
