@@ -61,9 +61,9 @@
                         <th>Kabupaten/Kota</th>
                         <th>Kecamatan</th>
                         <th>Desa/Kelurahan</th>
-                        <th>se26_selesai</th>
-                        <th>se26_diperiksa</th>
-                        <th>se26_is_finish</th>
+                        <th>Jumlah Selesai</th>
+                        <th>Jumlah Diperiksa</th>
+                        <th>Status SLS Selesai</th>
                     </tr>
                     </thead>
                     <tbody id="subsls-tbody">
@@ -164,20 +164,46 @@
             paginationEl.innerHTML = '';
             infoEl.textContent = 'Menampilkan ' + (meta.from || 0) + ' - ' + (meta.to || 0) + ' dari ' + meta.total + ' data';
 
-            if (meta.last_page <= 1) {
+            var last = meta.last_page || 1;
+            if (last <= 1) {
                 return;
             }
+
+            var current = meta.current_page || 1;
+            var delta = 2;
 
             var makeItem = function (label, page, disabled, active) {
                 return '<li class="page-item ' + (disabled ? 'disabled' : '') + ' ' + (active ? 'active' : '') + '">' +
                     '<a class="page-link" href="#" data-page="' + page + '">' + label + '</a></li>';
             };
 
-            paginationEl.innerHTML += makeItem('&laquo;', meta.current_page - 1, meta.current_page <= 1, false);
-            for (var i = 1; i <= meta.last_page; i++) {
-                paginationEl.innerHTML += makeItem(i, i, false, i === meta.current_page);
+            var makeEllipsis = function () {
+                return '<li class="page-item disabled"><span class="page-link user-select-none">&hellip;</span></li>';
+            };
+
+            var pageSet = {};
+            pageSet[1] = true;
+            pageSet[last] = true;
+            for (var i = current - delta; i <= current + delta; i++) {
+                if (i >= 1 && i <= last) {
+                    pageSet[i] = true;
+                }
             }
-            paginationEl.innerHTML += makeItem('&raquo;', meta.current_page + 1, meta.current_page >= meta.last_page, false);
+            var pages = Object.keys(pageSet).map(function (k) { return parseInt(k, 10); }).sort(function (a, b) { return a - b; });
+
+            paginationEl.innerHTML += makeItem('&laquo;', current - 1, current <= 1, false);
+
+            var prev = 0;
+            for (var j = 0; j < pages.length; j++) {
+                var p = pages[j];
+                if (prev && p - prev > 1) {
+                    paginationEl.innerHTML += makeEllipsis();
+                }
+                paginationEl.innerHTML += makeItem(String(p), p, false, p === current);
+                prev = p;
+            }
+
+            paginationEl.innerHTML += makeItem('&raquo;', current + 1, current >= last, false);
         }
 
         function loadSubsls(page) {

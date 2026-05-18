@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\InformationController;
 use App\Http\Controllers\MasterDesaController;
 use App\Http\Controllers\MasterKakoController;
 use App\Http\Controllers\MasterKecController;
@@ -26,6 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('master-kec', MasterKecController::class)->except(['index'])->parameters(['master_kec' => 'id']);
     Route::apiResource('master-desa', MasterDesaController::class)->except(['index'])->parameters(['master_desa' => 'id']);
     Route::apiResource('subsls', SubslsController::class)->parameters(['subsls' => 'id']);
-
+    Route::get('subsls-rekap', [SubslsController::class, 'rekap']);
+    Route::apiResource('information', InformationController::class)->parameters(['information' => 'id']);
 
 });

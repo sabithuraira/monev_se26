@@ -9,8 +9,9 @@ use App\Models\MasterKec;
 use App\Models\Subsls;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class SubslsController extends Controller
@@ -114,6 +115,247 @@ class SubslsController extends Controller
             ->get();
 
         return response()->json(['data' => $options]);
+    }
+
+    public function rekap(Request $request): JsonResponse
+    {
+        $resolved = $this->resolveRekapFilters($request);
+        if ($resolved instanceof JsonResponse) {
+            return $resolved;
+        }
+
+        $kodeProv = $resolved['kode_prov'];
+        $kodeKab = $resolved['kode_kab'];
+        $kodeKec = $resolved['kode_kec'];
+        $kodeDesa = $resolved['kode_desa'];
+
+        $baseQuery = $this->buildRekapFilteredSubslsQuery($kodeProv, $kodeKab, $kodeKec, $kodeDesa);
+        $summary = $this->computeRekapProgressSummary($baseQuery);
+
+        if ($kodeKab === '') {
+            $rows = Subsls::query()
+                ->select([
+                    'subsls.kode_kab',
+                    DB::raw('COALESCE(master_kako.nama_bps, master_kako.nama_pum, "") as nama_wilayah'),
+                    DB::raw('COUNT(*) as total_data'),
+                    DB::raw('SUM(subsls.se26_selesai) as total_se26_selesai'),
+                    DB::raw('SUM(subsls.se26_diperiksa) as total_se26_diperiksa'),
+                    DB::raw('SUM(subsls.se2026_is_finish) as total_se26_is_finish'),
+                ])
+                ->leftJoin('master_kako', 'master_kako.kode_bps', '=', DB::raw('CONCAT(subsls.kode_prov, subsls.kode_kab)'))
+                ->where('subsls.kode_prov', $kodeProv)
+                ->groupBy('subsls.kode_kab', 'master_kako.nama_bps', 'master_kako.nama_pum')
+                ->orderBy('subsls.kode_kab')
+                ->get()
+                ->map(fn ($row) => [
+                    'kode_prov' => $kodeProv,
+                    'kode_kab' => $row->kode_kab,
+                    'nama_wilayah' => $row->nama_wilayah,
+                    'total_data' => (int) $row->total_data,
+                    'total_se26_selesai' => (int) $row->total_se26_selesai,
+                    'total_se26_diperiksa' => (int) $row->total_se26_diperiksa,
+                    'total_se26_is_finish' => (int) $row->total_se26_is_finish,
+                ]);
+
+            return response()->json(['level' => 'kabupaten', 'data' => $rows, 'summary' => $summary]);
+        }
+
+        if ($kodeKec === '') {
+            $rows = Subsls::query()
+                ->select([
+                    'subsls.kode_kec',
+                    DB::raw('COALESCE(master_kec.nama_bps, master_kec.nama_pum, "") as nama_wilayah'),
+                    DB::raw('COUNT(*) as total_data'),
+                    DB::raw('SUM(subsls.se26_selesai) as total_se26_selesai'),
+                    DB::raw('SUM(subsls.se26_diperiksa) as total_se26_diperiksa'),
+                    DB::raw('SUM(subsls.se2026_is_finish) as total_se26_is_finish'),
+                ])
+                ->leftJoin('master_kec', 'master_kec.kode_bps', '=', DB::raw('CONCAT(subsls.kode_prov, subsls.kode_kab, subsls.kode_kec)'))
+                ->where('subsls.kode_prov', $kodeProv)
+                ->where('subsls.kode_kab', $kodeKab)
+                ->groupBy('subsls.kode_kec', 'master_kec.nama_bps', 'master_kec.nama_pum')
+                ->orderBy('subsls.kode_kec')
+                ->get()
+                ->map(fn ($row) => [
+                    'kode_prov' => $kodeProv,
+                    'kode_kab' => $kodeKab,
+                    'kode_kec' => $row->kode_kec,
+                    'nama_wilayah' => $row->nama_wilayah,
+                    'total_data' => (int) $row->total_data,
+                    'total_se26_selesai' => (int) $row->total_se26_selesai,
+                    'total_se26_diperiksa' => (int) $row->total_se26_diperiksa,
+                    'total_se26_is_finish' => (int) $row->total_se26_is_finish,
+                ]);
+
+            return response()->json(['level' => 'kecamatan', 'data' => $rows, 'summary' => $summary]);
+        }
+
+        if ($kodeDesa === '') {
+            $rows = Subsls::query()
+                ->select([
+                    'subsls.kode_desa',
+                    DB::raw('COALESCE(master_desa.nama_bps, master_desa.nama_pum, "") as nama_wilayah'),
+                    DB::raw('COUNT(*) as total_data'),
+                    DB::raw('SUM(subsls.se26_selesai) as total_se26_selesai'),
+                    DB::raw('SUM(subsls.se26_diperiksa) as total_se26_diperiksa'),
+                    DB::raw('SUM(subsls.se2026_is_finish) as total_se26_is_finish'),
+                ])
+                ->leftJoin('master_desa', 'master_desa.kode_bps', '=', DB::raw('CONCAT(subsls.kode_prov, subsls.kode_kab, subsls.kode_kec, subsls.kode_desa)'))
+                ->where('subsls.kode_prov', $kodeProv)
+                ->where('subsls.kode_kab', $kodeKab)
+                ->where('subsls.kode_kec', $kodeKec)
+                ->groupBy('subsls.kode_desa', 'master_desa.nama_bps', 'master_desa.nama_pum')
+                ->orderBy('subsls.kode_desa')
+                ->get()
+                ->map(fn ($row) => [
+                    'kode_prov' => $kodeProv,
+                    'kode_kab' => $kodeKab,
+                    'kode_kec' => $kodeKec,
+                    'kode_desa' => $row->kode_desa,
+                    'nama_wilayah' => $row->nama_wilayah,
+                    'total_data' => (int) $row->total_data,
+                    'total_se26_selesai' => (int) $row->total_se26_selesai,
+                    'total_se26_diperiksa' => (int) $row->total_se26_diperiksa,
+                    'total_se26_is_finish' => (int) $row->total_se26_is_finish,
+                ]);
+
+            return response()->json(['level' => 'desa', 'data' => $rows, 'summary' => $summary]);
+        }
+
+        $rows = Subsls::query()
+            ->select([
+                'subsls.kode_sls',
+                DB::raw('MAX(subsls.nama_sls) as nama_sls'),
+                DB::raw('COUNT(*) as total_data'),
+                DB::raw('SUM(subsls.se26_selesai) as total_se26_selesai'),
+                DB::raw('SUM(subsls.se26_diperiksa) as total_se26_diperiksa'),
+                DB::raw('SUM(subsls.se2026_is_finish) as total_se26_is_finish'),
+            ])
+            ->where('subsls.kode_prov', $kodeProv)
+            ->where('subsls.kode_kab', $kodeKab)
+            ->where('subsls.kode_kec', $kodeKec)
+            ->where('subsls.kode_desa', $kodeDesa)
+            ->groupBy('subsls.kode_sls')
+            ->orderBy('subsls.kode_sls')
+            ->get()
+            ->map(fn ($row) => [
+                'kode_prov' => $kodeProv,
+                'kode_kab' => $kodeKab,
+                'kode_kec' => $kodeKec,
+                'kode_desa' => $kodeDesa,
+                'kode_sls' => $row->kode_sls,
+                'nama_sls' => $row->nama_sls,
+                'total_data' => (int) $row->total_data,
+                'total_se26_selesai' => (int) $row->total_se26_selesai,
+                'total_se26_diperiksa' => (int) $row->total_se26_diperiksa,
+                'total_se26_is_finish' => (int) $row->total_se26_is_finish,
+            ]);
+
+        return response()->json(['level' => 'sls', 'data' => $rows, 'summary' => $summary]);
+    }
+
+    /**
+     * @return JsonResponse|array{kode_prov: string, kode_kab: string, kode_kec: string, kode_desa: string}
+     */
+    private function resolveRekapFilters(Request $request): JsonResponse|array
+    {
+        $validated = $request->validate([
+            'kode_prov' => 'required|string|size:2',
+            'kode_kab' => 'nullable|string|size:2',
+            'kode_kec' => 'nullable|string|size:3',
+            'kode_desa' => 'nullable|string|size:3',
+        ]);
+
+        $kodeProv = (string) $validated['kode_prov'];
+        $kodeKab = (string) ($validated['kode_kab'] ?? '');
+        $kodeKec = (string) ($validated['kode_kec'] ?? '');
+        $kodeDesa = (string) ($validated['kode_desa'] ?? '');
+
+        if ($kodeKab === '' && ($kodeKec !== '' || $kodeDesa !== '')) {
+            return response()->json(['message' => 'Parameter hierarchy invalid. kode_kec/kode_desa requires kode_kab.'], 422);
+        }
+        if ($kodeKec === '' && $kodeDesa !== '') {
+            return response()->json(['message' => 'Parameter hierarchy invalid. kode_desa requires kode_kec.'], 422);
+        }
+
+        $userKodeKab = $request->user()?->kode_kab ?? '00';
+        if ($userKodeKab !== '00') {
+            if ($kodeKab !== '' && $kodeKab !== $userKodeKab) {
+                return response()->json(['message' => 'Forbidden. You can only access data for your kabupaten.'], 403);
+            }
+            $kodeKab = $userKodeKab;
+        }
+
+        return [
+            'kode_prov' => $kodeProv,
+            'kode_kab' => $kodeKab,
+            'kode_kec' => $kodeKec,
+            'kode_desa' => $kodeDesa,
+        ];
+    }
+
+    private function buildRekapFilteredSubslsQuery(string $kodeProv, string $kodeKab, string $kodeKec, string $kodeDesa): Builder
+    {
+        $query = Subsls::query()->where('kode_prov', $kodeProv);
+
+        if ($kodeKab !== '') {
+            $query->where('kode_kab', $kodeKab);
+        }
+        if ($kodeKec !== '') {
+            $query->where('kode_kec', $kodeKec);
+        }
+        if ($kodeDesa !== '') {
+            $query->where('kode_desa', $kodeDesa);
+        }
+
+        return $query;
+    }
+
+    /**
+     * Percentages are share of total SLS rows in the current filter scope.
+     *
+     * @return array{
+     *     total_sls: int,
+     *     persen_total_progres_muatan: float,
+     *     persen_selesai: float,
+     *     persen_sedang_dikerjakan: float,
+     *     persen_belum_dikerjakan: float
+     * }
+     */
+    private function computeRekapProgressSummary(Builder $base): array
+    {
+        $total = (clone $base)->count();
+
+        if ($total === 0) {
+            return [
+                'total_sls' => 0,
+                'persen_total_progres_muatan' => 0.0,
+                'persen_selesai' => 0.0,
+                'persen_sedang_dikerjakan' => 0.0,
+                'persen_belum_dikerjakan' => 0.0,
+            ];
+        }
+
+        $progresMuatan = (clone $base)->where(function ($q) {
+            $q->where('se2026_is_finish', 1)
+                ->orWhereRaw('COALESCE(se26_selesai, 0) <> 0');
+        })->count();
+
+        $selesai = (clone $base)->where('se2026_is_finish', 1)->count();
+
+        $sedangDikerjakan = (clone $base)->whereRaw('COALESCE(se26_selesai, 0) <> 0')->count();
+
+        $belumDikerjakan = (clone $base)->whereRaw('COALESCE(se2026_is_finish, 0) = 0 AND COALESCE(se26_selesai, 0) = 0')->count();
+
+        $pct = fn (int $n): float => round(($n / $total) * 100, 2);
+
+        return [
+            'total_sls' => $total,
+            'persen_total_progres_muatan' => $pct($progresMuatan),
+            'persen_selesai' => $pct($selesai),
+            'persen_sedang_dikerjakan' => $pct($sedangDikerjakan),
+            'persen_belum_dikerjakan' => $pct($belumDikerjakan),
+        ];
     }
 
     /**
