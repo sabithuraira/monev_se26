@@ -19,7 +19,6 @@ class MasterKecController extends Controller
      *     tags={"Master Kec"},
      *     summary="List or get Master Kecamatan",
      *     description="List paginated records (optional filter by kode_kab = chars 3-4 of kode_bps), or get single by kode_bps. Requires Bearer token.",
-     *     security={{"sanctum":{}}},
      *     @OA\Parameter(name="kode_bps", in="query", required=false, description="Get single record by kode_bps (e.g. 1601052)", @OA\Schema(type="string")),
      *     @OA\Parameter(name="kode_kab", in="query", required=false, description="Filter list by kab (kode_bps positions 3-4)", @OA\Schema(type="string")),
      *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-1000)", @OA\Schema(type="integer", default=15)),

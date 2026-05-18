@@ -19,7 +19,6 @@ class MasterDesaController extends Controller
      *     tags={"Master Desa"},
      *     summary="List or get Master Desa",
      *     description="List paginated records (optional filters: kode_kab = kode_bps chars 3-4, kode_kec = chars 5-7), or get single by kode_bps. Requires Bearer token.",
-     *     security={{"sanctum":{}}},
      *     @OA\Parameter(name="kode_bps", in="query", required=false, description="Get single record by kode_bps (e.g. 1601052001)", @OA\Schema(type="string")),
      *     @OA\Parameter(name="kode_kab", in="query", required=false, description="Filter list by kab (kode_bps positions 3-4)", @OA\Schema(type="string")),
      *     @OA\Parameter(name="kode_kec", in="query", required=false, description="Filter list by kec (kode_bps positions 5-7)", @OA\Schema(type="string")),

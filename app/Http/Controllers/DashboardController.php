@@ -23,7 +23,6 @@ class DashboardController extends Controller
      *     tags={"Dashboard"},
      *     summary="List or get Histogram Kecamatan For Kabupaten/Kota",
      *     description="List paginated records, or get single by kode_bps. Requires Bearer token. Access scoped by user kode_kab.",
-     *     security={{"sanctum":{}}},
      *     @OA\Parameter(name="kode_bps", in="query", required=false, description="Get single record by kode_bps (e.g. 1601)", @OA\Schema(type="string")),
      *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-1000) when listing", @OA\Schema(type="integer", default=15)),
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
@@ -98,7 +97,6 @@ class DashboardController extends Controller
      *     tags={"Dashboard"},
      *     summary="List or get Histogram Desa For Kabupaten/Kota",
      *     description="List paginated records, or get single by kode_bps. Requires Bearer token. Access scoped by user kode_kab.",
-     *     security={{"sanctum":{}}},
      *     @OA\Parameter(name="kode_bps", in="query", required=false, description="Get single record by kode_bps (e.g. 1601010)", @OA\Schema(type="string")),
      *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-1000) when listing", @OA\Schema(type="integer", default=15)),
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
