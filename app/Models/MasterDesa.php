@@ -16,7 +16,7 @@ class MasterDesa extends Model
         'kode_bps', 'nama_bps', 'kode_pum', 'nama_pum', 'level', 'parent_code'
     ];
 
-    protected $appends = ['encId', 'kecamatan', 'kab', 'id_desa', 'nama_desa', 'id_kec', 'id_kab', 'id_prov'];
+    protected $appends = ['encId', 'kecamatan', 'kab','kode_desa', 'id_desa', 'nama_desa', 'id_kec', 'id_kab', 'id_prov'];
 
     public function getEncIdAttribute(){
         return Crypt::encryptString($this->id);
@@ -34,14 +34,14 @@ class MasterDesa extends Model
         $kec = MasterKec::where('kode_bps', $this->parent_code)
                 ->orWhere('kode_pum', $this->parent_code)
                 ->first();
-        
+
         if ($kec) {
             $data = MasterKako::where('kode_bps', $kec->parent_code)
                     ->orWhere('kode_pum', $kec->parent_code)
                     ->first();
             return $data->nama_bps ?? $data->nama_pum ?? '';
         }
-        
+
         return '';
     }
 
@@ -53,6 +53,17 @@ class MasterDesa extends Model
     public function getNamaDesaAttribute(){
         return $this->nama_bps ?? $this->nama_pum ?? '';
     }
+
+    public function getKodeDesaAttribute()
+    {
+        // Extract last 3 digits from kode_bps (e.g., "1601052010" -> "010")
+        $code = $this->kode_bps ?? $this->kode_pum ?? '';
+        if (strlen($code) >= 3) {
+            return substr($code, -3);
+        }
+        return $code;
+    }
+
 
     public function getIdKecAttribute(){
         // Extract last 2 digits from parent_code (e.g., "1601052" -> "52")
@@ -68,7 +79,7 @@ class MasterDesa extends Model
         $kec = MasterKec::where('kode_bps', $this->parent_code)
                 ->orWhere('kode_pum', $this->parent_code)
                 ->first();
-        
+
         if ($kec && $kec->parent_code) {
             $code = $kec->parent_code;
             if (strlen($code) >= 2) {
@@ -76,7 +87,7 @@ class MasterDesa extends Model
             }
             return $code;
         }
-        
+
         return '';
     }
 
@@ -85,14 +96,14 @@ class MasterDesa extends Model
         $kec = MasterKec::where('kode_bps', $this->parent_code)
                 ->orWhere('kode_pum', $this->parent_code)
                 ->first();
-        
+
         if ($kec) {
             $kab = MasterKako::where('kode_bps', $kec->parent_code)
                     ->orWhere('kode_pum', $kec->parent_code)
                     ->first();
             return $kab->parent_code ?? '';
         }
-        
+
         return '';
     }
 }

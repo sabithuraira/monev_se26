@@ -18,8 +18,7 @@ class InformationController extends Controller
      *     tags={"Information"},
      *     summary="List information",
      *     description="Paginated list ordered by id descending. Optionally filter by is_active.",
-     *     security={{"sanctum":{}}},
-     *
+
      *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-1000)", @OA\Schema(type="integer", default=15)),
      *     @OA\Parameter(name="is_active", in="query", required=false, description="Filter by active flag (e.g. true, false, 1, 0)", @OA\Schema(type="boolean")),
      *

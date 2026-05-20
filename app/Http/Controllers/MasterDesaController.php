@@ -63,7 +63,7 @@ class MasterDesaController extends Controller
             ->when($request->filled('kode_kec'), function ($q) use ($request) {
                 $q->whereRaw('SUBSTRING(kode_bps, 5, 3) = ?', [$request->get('kode_kec')]);
             });
-        $perPage = min(max((int) $request->get('per_page', 15), 1), 1000);
+        $perPage = min(max((int) $request->get('per_page', 15), 1), 4000);
         $items = $query->orderBy('kode_bps')->paginate($perPage);
 
         return response()->json([

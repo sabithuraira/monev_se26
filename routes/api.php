@@ -13,8 +13,9 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::get('master-kako', [MasterKakoController::class, 'index']);
-Route::get('master-kec', [MasterKakoController::class, 'index']);
+Route::get('master-kec', [MasterKecController::class, 'index']);
 Route::get('master-desa', [MasterDesaController::class, 'index']);
+Route::get('information', [InformationController::class, "index"]);
 Route::get('histogram_kecamatan', [DashboardController::class, "histogram_kecamatan"]);
 Route::get('histogram_desa', [DashboardController::class, "histogram_desa"]);
 // Protected by Sanctum
@@ -28,6 +29,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('master-desa', MasterDesaController::class)->except(['index'])->parameters(['master_desa' => 'id']);
     Route::apiResource('subsls', SubslsController::class)->parameters(['subsls' => 'id']);
     Route::get('subsls-rekap', [SubslsController::class, 'rekap']);
-    Route::apiResource('information', InformationController::class)->parameters(['information' => 'id']);
+    Route::apiResource('information', InformationController::class)->except(['index'])->parameters(['information' => 'id']);
 
 });

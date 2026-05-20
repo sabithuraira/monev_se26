@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
@@ -113,5 +114,23 @@ class AuthController extends Controller
     public function user(Request $request): JsonResponse
     {
         return response()->json(['data' => $request->user()]);
+    }
+
+
+    public function saveFcmToken(Request $request)
+    {
+        $request->validate([
+            'fcm_token' => 'required'
+        ]);
+
+        // kalau belum login bisa simpan ke tabel sendiri
+        DB::table('fcm_tokens')->insert([
+            'token' => $request->fcm_token,
+            'created_at' => now()
+        ]);
+
+        return response()->json([
+            'success' => true
+        ]);
     }
 }
