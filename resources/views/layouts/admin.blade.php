@@ -36,6 +36,49 @@
             color: white;
             border-left: 5px solid #fff;
         }
+        .sidebar-auth {
+            margin-top: auto;
+            padding: 16px;
+            border-top: 1px solid #343a40;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        .sidebar .sidebar-login {
+            display: block;
+            text-align: center;
+            text-decoration: none;
+            color: #fff;
+            font-weight: 600;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 2px solid #fd7e14;
+            background: linear-gradient(135deg, #e67700 0%, #fd7e14 100%);
+            transition: 0.25s;
+            box-shadow: 0 4px 12px rgba(253, 126, 20, 0.3);
+        }
+        .sidebar .sidebar-login:hover,
+        .sidebar .sidebar-login.is-active {
+            color: #fff;
+            border-color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(253, 126, 20, 0.45);
+        }
+        .sidebar .sidebar-logout {
+            display: block;
+            width: 100%;
+            text-align: center;
+            color: #f8d7da;
+            font-weight: 600;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 2px solid #dc3545;
+            background: transparent;
+            transition: 0.25s;
+        }
+        .sidebar .sidebar-logout:hover {
+            color: #fff;
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
         .content { width: 100%; padding: 30px; overflow-x: hidden; }
         .mobile-nav {
             display: none;
@@ -61,6 +104,23 @@
             border-bottom: 1px solid #343a40;
         }
         .offcanvas a:hover { background-color: #0d6efd; color: white; }
+        .offcanvas-auth {
+            padding: 16px;
+            border-top: 1px solid #343a40;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        .offcanvas .offcanvas-login {
+            display: block;
+            text-align: center;
+            text-decoration: none;
+            color: #fff;
+            font-weight: 600;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 2px solid #fd7e14;
+            background: linear-gradient(135deg, #e67700 0%, #fd7e14 100%);
+        }
+        .offcanvas .offcanvas-login:hover { color: #fff; }
     </style>
 </head>
 <body>
@@ -86,6 +146,13 @@
             <a href="/rekapitulasi"><i class="fas fa-table-list me-2"></i> Rekapitulasi</a>
             <a href="/hasil-klaster"><i class="fas fa-robot me-2"></i> Hasil Klaster</a>
             <a href="/data-subsls"><i class="fas fa-table me-2"></i> Data Subsls</a>
+            @guest
+            <div class="offcanvas-auth">
+                <a href="{{ route('login') }}" class="offcanvas-login">
+                    <i class="fas fa-sign-in-alt me-2"></i> Login
+                </a>
+            </div>
+            @endguest
         </div>
     </div>
 
